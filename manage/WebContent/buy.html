@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap-paginator.min.js"></script>
+<script type="text/javascript" src="view/js/moment.js"></script>
+<script type="text/javascript" src="view/js/daterangepicker.js"></script>
+
+<link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="view/css/daterangepicker-bs3.css"/>
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="view/css/templatemo_main.css">
+<title>Insert title here</title>
+</head>
+<body>
+	<script type="text/javascript">
+	var peopleid;
+		$(document).ready(function() {
+			initTable();
+		});
+
+		function login(){
+			var loginusername = $("#loginusername").val();
+			var loginpassword = $("#loginpassword").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/login",
+				data : {
+					"username" :　loginusername,
+					"password" : loginpassword
+				},
+				error : function() {
+					alert('登录失败');
+				},
+				success : function(data) {
+					if(data == null){
+						alert("登录失败");
+					}else{
+						alert("登陆成功");
+						$("#modal-container-770388").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function add(){
+			var name = $("#username").val();
+			var num = $("#num").val();
+			var company = $("#company").val();
+			if(name == ""){
+				alert("产品名称不能为空");
+				$("#modal-container-586989").modal("toggle");
+				return;
+			}
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "buy/add",
+				data : {
+					"name" : name,
+					"num" : num,
+					"company" : company,
+					"state" : 0,
+					"staffId" : peopleid
+				},
+				error : function() {
+					alert('请求失败');
+					$("#modal-container-586989").modal("toggle");
+				},
+				success : function(data) {
+					if(data > 0){
+						alert("增加成功");
+						$("#modal-container-586989").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function initTable() {
+			var roleName;
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/getUser",
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+					if(data.data == null){
+						$("#modal-container-770388").modal();
+					}else{
+						peopleid = data.data.id;
+						roleName = data.data.roleName;
+						if(roleName == "root"){
+							$("#quanxian").show();
+						}else{
+							$("#quanxian").hide();
+						}
+						var tbody = "";
+						var tbodywithpage = "";
+						var state = $("#select").val();
+						if(state == "" || state == null){
+							state = -1;
+						}
+						$.ajax({
+							type : 'POST',
+							dataType : "json",
+							url : "buy/selectwithpage",
+							data : {
+								"currentPage" : 1,
+								"pageSize" : 5,
+								"state" : state,
+								"peopleid" : peopleid,
+								"roleName" : roleName
+							},
+							error : function() {
+								alert('请求失败');
+							},
+							success : function(data) {
+								var result = data.value;
+								if(roleName == "root" || roleName == "manager"){
+									var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>来源</th><th>审核状态</th><th>操作</th></tr>";
+									$.each(result, function(i, resultObj) {
+										if (i % 2 == 0) {
+											tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>审核</button></td></tr>";
+										} else {
+											tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>审核</button></td></tr>";
+										}
+									});
+								}else if(roleName == "staff"){
+									var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>来源</th><th>审核状态</th></tr>";
+									$.each(result, function(i, resultObj) {
+										if (i % 2 == 0) {
+											tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td></tr>";
+										} else {
+											tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td></tr>";
+										}
+									});
+								}
+								
+								$("#thead").html(thead);
+								$("#tbody").html(tbody);
+								var pageSize = data.pageSize;
+								var pageCount = data.pageCount;
+								var currentPage = data.currentPage;
+								var options = {
+									currentPage : currentPage,
+									totalPages : pageCount,
+									size : "normal",
+									bootstrapMajorVersion : 3,
+									alignment : "right",
+									numberOfPages : pageSize,
+									itemTexts : function(type, page, current) {
+										switch (type) {
+										case "first":
+											return "首页";
+										case "prev":
+											return "上一页";
+										case "next":
+											return "下一页";
+										case "last":
+											return "末页";
+										case "page":
+											return page;
+										}
+									},
+									//点击事件，用于通过Ajax来刷新整个list列表
+									onPageClicked : function(event, originalEvent,type, page) {
+										$.ajax({
+											url : "buy/selectwithpage",
+											type : "POST",
+											data : {
+												"currentPage" : page,
+												"pageSize" : pageSize,
+												"state" : state,
+												"peopleid" : peopleid,
+												"roleName" : roleName
+											},
+											success : function(data) {
+												var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>审核状态</th><th>操作人</th><th>操作</th></tr>";
+												var resultwithpage = data.value;
+												if(roleName == "root" || roleName == "manager"){
+													$.each(resultwithpage,function(j,resultwithpageObj) {
+														if (j % 2 == 0) {
+															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>审核</button></td></tr>";
+														} else {
+															tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>审核</button></td></tr>";
+														}
+												    });
+												}else if(roleName == "staff"){
+													$.each(resultwithpage,function(j,resultwithpageObj) {
+														if (j % 2 == 0) {
+															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td></tr>";
+														} else {
+															tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td></tr>";
+														}
+												    });
+												}
+												$("#tbody").html(tbodywithpage);
+												tbodywithpage = "";
+											}
+										});
+									}
+								};
+								$('#pageLimit').bootstrapPaginator(options);
+							}
+						});
+					}
+				}
+			});
+		}
+		                    /* 审核*/
+		function virtify(id){
+		    $.ajax({
+	            type: 'post',
+	            url: 'buy/select',
+	            cache:false,
+	            dataType : 'json',
+	            data:{"id":id},
+	            success: function(data){
+	            	var managerId = 1;
+	            	var result = data.value;
+	            	$("#modal-container-770348").modal();
+	            	$("#upd_username").val(result.name);
+	            	$("#upd_num").val(result.num);
+	            	$("#upd_company").val(result.company);
+	            	
+	            	$("#virtify").click(function(){
+	    		        $.ajax({
+	    		            type: 'post',
+	    		            url: 'buy/virtify',
+	    		            cache:false,
+	    		            dataType : 'json',
+	    		            data:{
+	    		            	"id":id,
+	    		            	"name" : result.name,
+	    		            	"num" :result.num,
+	    		            	"company" : result.company,
+	    		            	"staffId" : result.staffId,
+	    		            	"managerId" : peopleid,
+	    		            	"state" :1
+	    		            },
+	    		            success: function(data){
+	    		                $("#modal-container-770348").modal("toggle");
+	    		                window.location.reload();
+	    		            }
+	    		        });
+	    		    }); 
+	            	/* 拒绝 */
+	            	$("#refuse").click(function(){
+	            		alert(peopleid);
+	    		        $.ajax({
+	    		            type: 'post',
+	    		            url: 'buy/virtify',
+	    		            cache:false,
+	    		            dataType : 'json',
+	    		            data:{
+	    		            	"id":id,
+	    		            	"name" : result.name,
+	    		            	"num" :result.num,
+	    		            	"company" : result.company,
+	    		            	"staffId" : result.staffId,
+	    		            	"managerId" : peopleid,
+	    		            	"state" :2
+	    		            },
+	    		            success: function(data){
+	    		                $("#modal-container-770348").modal("toggle");
+	    		                window.location.reload();
+	    		            }
+	    		        });
+	    		    }); 
+	            }
+	        });
+		}
+	</script>
+<div id="main-wrapper">
+<div class="navbar navbar-inverse" role="navigation">
+      <div class="navbar-header">
+        <div class="logo"><h1>库存管理系统</h1></div>
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">库存管理系统</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button> 
+      </div>   
+</div>
+   <div class="template-page-wrapper">
+      <div class="navbar-collapse collapse templatemo-sidebar">
+        <ul class="templatemo-sidebar-menu">
+          <li><a href="index.html"><i class="fa fa-home"></i>首页</a></li>
+          <li><a href="production.html"><i class="fa fa-cubes"></i>产品管理</a></li>
+          <li class="active"><a href="buy.html"><i class="fa fa-map-marker"></i>进货管理</a></li>
+          <li><a href="out.html"><i class="fa fa-users"></i>出货管理</a></li>
+          <li><a href="stock.html"><i class="fa fa-cog"></i>库存管理</a></li>
+          <li id ="quanxian"><a href="user.html"><i class="fa fa-cog"></i>权限管理</a></li>
+        </ul>
+      </div>
+<div class="templatemo-content-wrapper">
+<div class="templatemo-content">	
+                                          <!-- 登录 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770388" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								请您先登录
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form" style = "width:500px">
+				<div class="form-group">
+					 <label for="exampleInputEmail1">用户名</label><input type="text" id = "loginusername" class="form-control"/>
+				</div>
+				<div class="form-group">
+					 <label for="exampleInputPassword1">密码</label><input type="password" id = "loginpassword" class="form-control"/>
+				</div>
+				<button type="button" class="btn btn-default" onclick="login()">登录</button>
+			</form>
+							</div></p>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<!-- 新增 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<a id="modal-586989" href="#modal-container-586989" role="button"
+					class="btn btn-default" data-toggle="modal">填写采购单</a>
+
+				<div class="modal fade" id="modal-container-586989" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">新增采购原料</h4>
+							</div>
+							<div class="modal-body">
+								<form role="form">
+									<div class="form-group">
+										<label for="exampleInputEmail1">产品名称</label><input
+											type="email" id = "username" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">产品数量</label><input
+											type="email" id = "num" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">来源</label><input type="email"
+											class="form-control" id="company" />
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" id = "save" class="btn btn-primary" onclick="add()">保存</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+                                  <!-- 搜索 -->
+<div class="container" style="width:300px"><div class="row clearfix"><div class="col-md-12 column" style="margin-top:-35px">
+<form role="form">
+	<div class="form-group">
+	<dl class="dl-horizontal">
+		<dt><select class="form-control" id = "select">
+		    <option value="-1">所有状态</option>
+			<option value="1">审核通过</option>
+			<option value="2">审核未通过</option>
+			<option value="0">待审</option>
+		</select></dt>
+		<dd><button type="button" id = "search" class="btn btn-default" onclick = "initTable()">搜索</button></dd>
+    </dl>
+	</div>
+</form>
+</div></div></div>
+
+	                              <!-- 审核 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770348" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								审核
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form">
+									<div class="form-group">
+										<label for="exampleInputEmail1">产品名称</label><input
+											type="email" id = "upd_username" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">产品数量</label><input
+											type="email" id = "upd_num" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">来源</label><input type="email"
+											class="form-control" id="upd_company" />
+									</div>
+								</form>
+							</div></p>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> <button type="button" class="btn btn-primary" id = "virtify">审核通过</button><button type="button" class="btn btn-primary" id = "refuse">拒绝</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<!-- 表格 -->
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table">
+					<thead id="thead">
+
+					</thead>
+					<tbody id="tbody">
+
+					</tbody>
+				</table>
+				<div id="example" style="text-align: right">
+					<ul id="pageLimit"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+</div></div></div></div>
+</body>
+</html>
