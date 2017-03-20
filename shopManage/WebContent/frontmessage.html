@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap-paginator.min.js"></script>
+<script type="text/javascript" src="view/js/moment.js"></script>
+<script type="text/javascript" src="view/js/daterangepicker.js"></script>
+
+<link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="view/css/daterangepicker-bs3.css"/>
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="view/css/templatemo_main.css">
+<title>订餐后台管理系统</title>
+</head>
+<body>
+	<script type="text/javascript">
+	var phone = "";
+	var peoplename = "";
+	var peopleid = "";
+	var c = 0;
+		$(document).ready(function() {
+			initTable();
+			initCp();
+			initPic();
+			initInfo();
+		});
+
+		function initInfo(){
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "notice/selectwithpage",
+				data : {
+					"currentPage" : 1,
+					"pageSize" : 5
+				},
+				success : function(data) {
+					var result = data.data;
+					var str = '<ol style="margin:0;padding:0">';
+					$.each(result, function(i, resultObj) {
+						str = str +　'<li><a href="#" onclick = exp("'+resultObj.content+'")>'+resultObj.title+'</a></li>';
+					});
+					str = str + '</ol>'
+					$("#information").html(str);
+					if(peoplename!=null && peoplename!=''){
+						$("#wel").html("<h4>欢迎会员"+peoplename+"登录</h4>");
+					}else{
+						$("#wel").html("<a href = 'login.html'><h4>请登录</h4></a>");
+					}
+					
+				}
+			});
+		}
+		
+		function exp(str){
+			$("#modal-container-806285").modal();
+			$("#mycontent").html(str)
+		}
+		
+		function initPic(){
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/getUser",
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+						var tbody = "";
+						var tbodywithpage = "";
+						$.ajax({
+							type : 'POST',
+							dataType : "json",
+							url : "cp/selectwithpage",
+							data : {
+								"currentPage" : 1,
+								"pageSize" : 9
+							},
+							error : function() {
+								alert('请求失败');
+							},
+							success : function(data) {
+								var result = data.data;
+								var  one = "";
+								var  two = "";
+								var  three = "";
+								var picandprice = "<div class = 'row'>";
+								var w = '<div class="col-md-1" width="50px"></div>';
+								$.each(result, function(i, resultObj) {
+									if(i <= 4){
+										one = one +w+　'<div class="col-md-1"><ul><li class = "list-unstyled"><img src="'+resultObj.picture+'" /></li><li class = "list-unstyled">'+resultObj.goodsname+'</li><li class = "list-unstyled"><span>价格</span>'+resultObj.nowprice+'</li><li class = "list-unstyled" style="width:100px" onclick=addcar('+resultObj.goodsname+')>加入购物车</li></ul></div>';
+									}
+									if(i>4 && i <= 9){
+										two = two +w+ '<div class="col-md-1"><ul><li class = "list-unstyled"><img src="'+resultObj.picture+'" /></li><li class = "list-unstyled">'+resultObj.goodsname+'</li><li class = "list-unstyled">'+resultObj.nowprice+'</li><li class = "list-unstyled" style="width:100px" onclick=addcar('+resultObj.goodsname+')>加入购物车</li></ul></div>';
+									}
+									if(i>9 && i<=14){
+										three = three +w+ '<div class="col-md-1"><ul><li class = "list-unstyled"><img src="'+resultObj.picture+'" /></li><li class = "list-unstyled">'+resultObj.goodsname+'</li><li class = "list-unstyled">'+resultObj.nowprice+'</li><li class = "list-unstyled" style="width:100px" onclick=addcar('+resultObj.goodsname+')>加入购物车</li></ul></div>';
+									}
+								});
+								$("#picandprice").html(picandprice+one+"</div>"+picandprice+two+"</div>"+picandprice+three+"</div>");
+								var pageSize = data.pageSize;
+								var pageCount = data.pageCount;
+								var currentPage = data.currentPage;
+								var options = {
+									currentPage : currentPage,
+									totalPages : pageCount,
+									size : "normal",
+									bootstrapMajorVersion : 3,
+									alignment : "right",
+									numberOfPages : pageSize,
+									itemTexts : function(type, page, current) {
+										switch (type) {
+										case "first":
+											return "首页";
+										case "prev":
+											return "上一页";
+										case "next":
+											return "下一页";
+										case "last":
+											return "末页";
+										case "page":
+											return page;
+										}
+									},
+									//点击事件，用于通过Ajax来刷新整个list列表
+									onPageClicked : function(event, originalEvent,type, page) {
+										$.ajax({
+											url : "cp/selectwithpage",
+											type : "POST",
+											data : {
+												"currentPage" : page,
+												"pageSize" : pageSize
+											},
+											success : function(data) {
+												var resultwithpage = data.data;
+												var  one = "";
+												var  two = "";
+												var  three = "";
+												var picandprice = "<div class = 'row'>";
+												var w = '<div class="col-md-1" width="20px"></div>';
+												$.each(resultwithpage, function(j,resultwithpageObj) {
+													if(j <= 4){
+														one = one +w+　'<div class="col-md-1"><ul><li class = "list-unstyled"><img src="'+resultwithpageObj.picture+'" /></li><li class = "list-unstyled">'+resultwithpageObj.goodsname+'</li><li class = "list-unstyled">'+resultwithpageObj.nowprice+'</li><li class = "list-unstyled" style="width:100px" onclick=addcar('+resultwithpageObj.goodsname+')>加入购物车</li></ul></div>';
+													}
+													if(j>4 && j <= 9){
+														two = two +w+ '<div class="col-md-1"><ul><li class = "list-unstyled"><img src="'+resultwithpageObj.picture+'" /></li><li class = "list-unstyled">'+resultwithpageObj.goodsname+'</li><li class = "list-unstyled">'+resultwithpageObj.nowprice+'</li><li class = "list-unstyled" style="width:100px" onclick=addcar('+resultwithpageObj.goodsname+')>加入购物车</li></ul></div>';
+													}
+													if(j>9 && j<=14){
+														three = three +w+ '<div class="col-md-1"><ul><li class = "list-unstyled"><img src="'+resultwithpageObj.picture+'" /></li><li class = "list-unstyled">'+resultwithpageObj.goodsname+'</li><li class = "list-unstyled">'+resultwithpageObj.nowprice+'</li><li class = "list-unstyled" style="width:100px" onclick=addcar('+resultwithpageObj.goodsname+')>加入购物车</li></ul></div>';
+													}
+												});
+												$("#picandprice").html(picandprice+one+"</div>"+picandprice+two+"</div>"+picandprice+three+"</div>");
+											}
+										});
+									}
+								}
+								$('#pageLimit2').bootstrapPaginator(options);
+							}
+						});
+						if(data.data != null){
+							peopleid = data.data.id;
+							peoplename = data.data.username;
+							phone = data.data.phone;
+						}else{
+							peopleid = "";
+							peoplename = "";
+							phone = "";
+						}
+				}
+			});
+		}
+		
+		function addcar(name){
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "order/add",
+				data : {
+					"cpname" : name,
+					"username": peoplename 
+				},
+				success : function(data) {
+					alert("加入购物车成功");
+				}
+			});
+		}
+		
+		function initCp(){
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "cp/selectall",
+				data : {
+					"sjid" : 1
+				},
+				success : function(data) {
+					if(data == null){
+						alert("查询失败");
+					}else{
+						var ss = '<select class="form-control" id = "select">';
+						for(var i = 0; i < data.length; i++) {
+							ss = ss + '<option value="'+data[i].id+'">'+data[i].goodsname+'</option>'
+						}
+						ss = ss +　'</select>';
+						$("#s").append(ss);
+					}
+				}
+			});
+		}
+		
+		function login(){
+			var loginusername = $("#loginusername").val();
+			var loginpassword = $("#loginpassword").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/login",
+				data : {
+					"username" :　loginusername,
+					"password" : loginpassword
+				},
+				error : function() {
+					alert('登录失败');
+				},
+				success : function(data) {
+					if(data == null){
+						alert("登录失败");
+					}else{
+						alert("登陆成功");
+						$("#modal-container-770388").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function add(){
+			var username = $("#username").val();
+			var phone = $("#phone").val();
+			var content = $("#content").val();
+			var reply = $("#reply").val();
+			if(username == ""){
+				alert("用户名");
+				return;
+			}
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "message/add",
+				data : {
+					"username" : username,
+					"phone" : phone,
+					"content" : content,
+					"reply" : reply,
+				},
+				error : function() {
+					alert('请求失败');
+					$("#modal-container-586988").modal("toggle");
+				},
+				success : function(data) {
+					if(data > 0){
+						alert("增加成功");
+						$("#modal-container-586988").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function sub(){
+			var message = $("#message").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "message/add",
+				data : {
+					"username" : peoplename,
+					"phone" : phone,
+					"content" : message,
+					"reply" : ""
+				},
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+					if(data > 0){
+						alert("增加成功");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function vote(){
+			var title = $("#title").val();
+			var content = $("#content").val();
+			var rj = $("#rj").val();
+			var ztpj = $('#color input:radio:checked').val();
+			var cpid = $("#select").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "vote/add",
+				data : {
+					"username" : peoplename,
+					"cpid" : cpid,
+					"sjid" : 1,
+					"ztpj" : ztpj,
+					"title": title,
+					"rj":rj,
+					"content":content
+				},
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+					if(data > 0){
+						alert("增加成功");
+						$("#modal-container-296962").modal("toggle");
+					}
+				}
+			});
+		}
+		
+		function initTable() {
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/getUser",
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+						var tbody = "";
+						var tbody2 = "";
+						$.ajax({
+							type : 'POST',
+							dataType : "json",
+							url : "message/selectwithpage",
+							data : {
+								"currentPage" : 1,
+								"pageSize" : 5
+							},
+							error : function() {
+								alert('请求失败');
+							},
+							success : function(data) {
+								var result = data.data;
+								var url = '<ul class="list-group">';
+								$.each(result, function(i, resultObj) {
+									if(resultObj.reply!=null && resultObj.reply!=''){
+										tbody += '<li class="list-group-item">用户名:'+resultObj.username+'</li><li class="list-group-item">留言:'+resultObj.content+'</li><li class="list-group-item">回复:'+resultObj.reply+'</li><br/>';
+									}else{
+										tbody += '<li class="list-group-item">用户名:'+resultObj.username+'</li><li class="list-group-item">留言:'+resultObj.content+'</li><br/>';
+									}
+								});
+								var content = url + tbody + "</ul>"; 
+								$("#tbody").html(content);
+								var pageSize = data.pageSize;
+								var pageCount = data.pageCount;
+								var currentPage = data.currentPage;
+								var options = {
+									currentPage : currentPage,
+									totalPages : pageCount,
+									size : "normal",
+									bootstrapMajorVersion : 3,
+									alignment : "right",
+									numberOfPages : pageSize,
+									itemTexts : function(type, page, current) {
+										switch (type) {
+										case "first":
+											return "首页";
+										case "prev":
+											return "上一页";
+										case "next":
+											return "下一页";
+										case "last":
+											return "末页";
+										case "page":
+											return page;
+										}
+									},
+									//点击事件，用于通过Ajax来刷新整个list列表
+									onPageClicked : function(event, originalEvent,type, page) {
+										$.ajax({
+											url : "message/selectwithpage",
+											type : "POST",
+											data : {
+												"currentPage" : page,
+												"pageSize" : pageSize
+											},
+											success : function(data) {
+												var resultwithpage = data.data;
+												var url = '<ul class="list-group">';
+												$.each(resultwithpage, function(i, resultwithpageObj) {
+													if(resultwithpageObj.reply!=null && resultwithpageObj.reply!=''){
+														tbody2 += '<li class="list-group-item">用户名:'+resultwithpageObj.username+'</li><li class="list-group-item">留言:'+resultwithpageObj.content+'</li><li class="list-group-item">回复:'+resultwithpageObj.reply+'</li><br/>';
+													}else{
+														tbody2 += '<li class="list-group-item">用户名:'+resultwithpageObj.username+'</li><li class="list-group-item">留言:'+resultwithpageObj.content+'</li><br/>';
+													}
+												});
+												var content2 = url + tbody2 + "</ul>"; 
+												$("#tbody").html(content2);
+											}
+										});
+									}
+								};
+								$('#pageLimit').bootstrapPaginator(options);
+							}
+						});
+				}
+			});
+		}
+	</script>
+                                          <!-- 登录 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770388" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								请您先登录
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form" style = "width:500px">
+				<div class="form-group">
+					 <label for="exampleInputEmail1">用户名</label><input type="text" id = "loginusername" class="form-control"/>
+				</div>
+				<div class="form-group">
+					 <label for="exampleInputPassword1">密码</label><input type="password" id = "loginpassword" class="form-control"/>
+				</div>
+				<button type="button" class="btn btn-default" onclick="login()">登录</button>
+			</form>
+							</div></p>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<!--  公告 -->
+	<div style="margin-left: 300px">
+		<h4>公告</h4>
+		<p id="information"></p>
+	</div>
+	<p id="wel" style="margin-left: 550px; margin-top: -100px"></p>
+	<a href="car.html"><h4 style="margin-left: 750px; margin-top: -28px; color:black">我的购物车</h4></a>
+	<a id="modal-296962" href="#modal-container-296962" role="button" class="btn" data-toggle="modal" style="margin-left: 950px; margin-top: -62px"><h4 style="color:black">投票</h4></a>
+<!-- 公告遮罩窗体 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-806285" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								公告
+							</h4>
+						</div>
+						<div class="modal-body">
+							<span id = "mycontent"></span>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						</div>
+					</div>
+					
+				</div>
+				
+			</div>
+			
+		</div>
+	</div>
+</div>
+<!-- 整体 -->
+	<div class="container-fluid" style = "margin-top:60px">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table" id = "picandprice">
+				</table>
+				<div id="example2" style="text-align: right">
+					<ul id="pageLimit2"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+	
+   <!-- 投票 -->
+   <div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-296962" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								投票
+							</h4>
+						</div>
+						<div class="modal-body">
+				菜品：
+					<div class="form-group" id = "s">
+						
+					</div>
+					总体评价：
+					<div class="form-group">
+						<div class="btn-group" id="color" data-toggle="buttons">
+							<label class="btn btn-default"> <input type="radio"
+								class="toggle" value="1"> 1分
+							</label> <label class="btn btn-default"> <input type="radio"
+								class="toggle" value="2"> 2分
+							</label> <label class="btn btn-default"> <input type="radio"
+								class="toggle" value="3"> 3分
+							</label>
+						</div>
+					</div>
+					标题：
+					<div class="form-group">
+						<input type="text" id="title" class="form-control" />
+					</div>
+					人均：
+					<div class="form-group">
+						<input type="text" id="rj" class="form-control" />
+					</div>
+					内容：
+					<div class="form-group">
+						<textarea class="form-control" id="content" rows="3"></textarea>
+					</div>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> <button type="button" class="btn btn-primary" onclick="vote()">保存</button>
+						</div>
+					</div>
+					
+				</div>
+				
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+	<!-- 表格 -->
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table">
+					<thead id="thead">
+
+					</thead>
+					<tbody id="tbody">
+
+					</tbody>
+				</table>
+				<div id="example" style="text-align: right">
+					<ul id="pageLimit"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				留言：
+				<form role="form">
+					<div class="form-group">
+						<textarea class="form-control" id="message" rows="3"></textarea>
+					</div>
+					<div class="col-md-12 column">
+						<button type="button" class="btn btn-default" onclick="sub()">提交</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

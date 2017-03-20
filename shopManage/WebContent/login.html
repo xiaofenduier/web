@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>用户注册</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width">
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap-paginator.min.js"></script>
+<script type="text/javascript" src="view/js/moment.js"></script>
+<script type="text/javascript" src="view/js/daterangepicker.js"></script>
+<script src="view/js/bootstrapValidator.min.js"></script>
+
+<link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css"
+	rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all"
+	href="view/css/daterangepicker-bs3.css" />
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap.min.css">
+<link rel="stylesheet" href="view/css/templatemo_main.css">
+<link rel="stylesheet" type="text/css"
+	href="view/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="view/css/bootstrapValidator.min.css">
+
+</head>
+<body>
+	<script type="text/javascript">
+$(document).ready(function() {
+	/* 验证码 */
+	function randomNumber(min, max) {
+				return Math.floor(Math.random()* (max - min + 1) + min);
+			};
+			function generateCaptcha() {
+				$('#captchaOperation').html([randomNumber(1, 50), '+',randomNumber(1, 50), '=' ].join(' '));
+			};
+			generateCaptcha();
+				$('#LoginG').bootstrapValidator(
+					{
+						feedbackIcons : {
+						valid : 'glyphicon glyphicon-ok',
+						invalid : 'glyphicon glyphicon-remove',
+						validating : 'glyphicon glyphicon-refresh'
+					},
+				fields : {
+					captcha : {
+						validators : {
+							callback : {
+								message : '验证码错误',
+								callback : function(value,validator) {
+									var items = $('#captchaOperation').html().split(' '), 
+									sum = parseInt(items[0])+ parseInt(items[2]);
+									return value == sum;
+								}
+							}
+						}
+					}
+				}
+			}).on('error.form.bv',function(e) {
+				var $form = $(e.target), bootstrapValidator = $form.data('bootstrapValidator');
+				if (!bootstrapValidator.isValidField('captcha')) {
+					generateCaptcha();
+				}
+			});
+});
+function login(){
+	var username = $("#username").val();
+	var password = $("#password").val();
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "user/login",
+		data : {
+			"username" :　username,
+			"password" : password
+		},
+		success : function(data) {
+			if(data == null){
+				alert("登录失败");
+			}else{
+				alert("登陆成功");
+				window.location.href = "frontmessage.html";
+			}
+		}
+	});
+}
+
+</script>
+	<div class="col-md-offset-4 col-md-4" id="logincontain">
+			<div id="myTabContent" class="tab-content">
+				<div class="tab-pane fade in active" id="Prv">
+					<div class="well well-sm ">
+						<h3 class="panel-title">用户登录</h3>
+					</div>
+					<div class="panel-body">
+						<div name="LoginG" id="LoginG" method="post" >
+							<div class="form-group">
+								<div class="input-group">
+									<span class="input-group-addon">账&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号</span> <input
+										name="Username" type="text" id="username" class="form-control"
+										placeholder="Username"></td>
+								</div>
+								<br />
+							</div>
+							<!-- /form-group-->
+							<div class="form-group">
+								<div class="input-group">
+									<span class="input-group-addon">密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码</span> <input
+										name="Password" type="Password" id="password"
+										class="form-control" placeholder="Password">
+									<!--<span class="help-block" id="PasswordMessage" /> -->
+								</div>
+							</div>
+							<!-- /form-group-->
+							<h5>请将如下计算结果填入文本框内：</h5>
+							<div class="form-group form-horizontal">
+								<label class="col-lg-3 control-label " id="captchaOperation"></label>
+								<div class="col-lg-9">
+									<input type="text" class="form-control " name="captcha" />
+								</div>
+							</div>
+							<br /> <br /> <br />
+							<div class="form-group">
+								<input class="btn btn-primary btn-block" type="submit"
+									value="登录" onclick="login()" />
+							</div>
+						</div>
+					</div>
+					<!-- /panel-body -->
+					还没有账号<a href = "register.html">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<h4>注册</h4></a>
+			</div>
+			<!--myTabContent-->
+	</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap-paginator.min.js"></script>
+<script type="text/javascript" src="view/js/moment.js"></script>
+<script type="text/javascript" src="view/js/daterangepicker.js"></script>
+
+<link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="view/css/daterangepicker-bs3.css"/>
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="view/css/templatemo_main.css">
+<title>Insert title here</title>
+</head>
+<body>
+	<script type="text/javascript">
+	var peoplename;
+		$(document).ready(function() {
+			initTable();
+		});
+
+		function login(){
+			var loginusername = $("#loginusername").val();
+			var loginpassword = $("#loginpassword").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/login",
+				data : {
+					"username" :　loginusername,
+					"password" : loginpassword
+				},
+				error : function() {
+					alert('登录失败');
+				},
+				success : function(data) {
+					if(data == null){
+						alert("登录失败");
+					}else{
+						alert("登陆成功");
+						$("#modal-container-770388").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function initTable() {
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/getUser",
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+					if(data.data == null){
+						$("#modal-container-770388").modal();
+					}else{
+						var count = 0;
+						var tbody = "";
+						var tbodywithpage = "";
+						peoplename = data.data.username;
+						$.ajax({
+							type : 'POST',
+							dataType : "json",
+							url : "order/selectwithpageforcar",
+							data : {
+								"currentPage" : 1,
+								"pageSize" : 1000,
+								"username": peoplename
+							},
+							error : function() {
+								alert('请求失败');
+							},
+							success : function(data) {
+								var result = data.data;
+								var thead = "<tr><th>编号</th><th>菜品</th><th>数量</th><th>价格</th><th>操作</th></tr>";
+								$.each(result, function(i, resultObj) {
+									if (i % 2 == 0) {
+										tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> " + resultObj.cpname+ " </td><td>"+resultObj.num+"</td><td>"+resultObj.bz+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button></td></tr>";
+									} else {
+										tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> " + resultObj.cpname+ " </td><td>"+resultObj.num+"</td><td>"+resultObj.bz+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button></td></tr>";
+									}
+									count = count + parseInt(resultObj.bz) * resultObj.num;
+								});
+								
+								$("#count").html(count);
+								$("#thead").html(thead);
+								$("#tbody").html(tbody);
+							}
+						});
+					}
+				}
+			});
+		}
+        /* 删除 */
+		function del(id){
+		    $("#modal-container-770346").modal();
+		    $("#remove").click(function(){
+		        $.ajax({
+		            type: 'post',
+		            url: 'order/delete',
+		            cache:false,
+		            dataType : 'json',
+		            data:{"id":id},
+		            success: function(data){
+		                $("#modal-container-770346").modal("toggle");
+		                window.location.reload();
+		            }
+		        });
+		    });
+		}
+		                    /* 修改*/
+		function virtify(id){
+		    $.ajax({	      
+      			type: 'post',
+	            url: 'order/select',
+	            cache:false,
+	            dataType : 'json',
+	            data:{"id":id},
+	            success: function(data){
+	            	var result = data.data;
+	            	if (result.ispay != 1){
+	            		alert("未付款，不能配送");
+	            		return;
+	            	}
+	            	$("#modal-container-770348").modal("toggle");
+	            	$("#ok").click(function(){
+	    		        $.ajax({
+	    		            type: 'post',
+	    		            url: 'order/update',
+	    		            cache:false,
+	    		            dataType : 'json',
+	    		            data:{
+	    		            	"id":result.id,
+	    		            	"username" : result.username,
+	    		            	"orderdata" :result.orderdata,
+	    		            	"enforce" : result.enforce,
+	    		            	"ispay" : result.ispay,
+	    		            	"cpname" : result.cpname,
+	    		            	"num" : $("#upd_num").val()
+	    		            },
+	    		            success: function(data){
+	    		                window.location.reload();
+	    		            }
+	    		        });
+	    		    }); 
+	            }
+	        });
+		}
+	</script>
+	                             <!-- 删除 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770346" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								删除！
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p id = "delete">确认删除？</p>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> <button type="button" class="btn btn-primary" id = "remove">确认</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+                                          <!-- 登录 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770388" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								请您先登录
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form" style = "width:500px">
+				<div class="form-group">
+					 <label for="exampleInputEmail1">用户名</label><input type="text" id = "loginusername" class="form-control"/>
+				</div>
+				<div class="form-group">
+					 <label for="exampleInputPassword1">密码</label><input type="password" id = "loginpassword" class="form-control"/>
+				</div>
+				<button type="button" class="btn btn-default" onclick="login()">登录</button>
+			</form>
+							</div></p>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<!-- 表格 -->
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table">
+					<thead id="thead">
+
+					</thead>
+					<tbody id="tbody">
+
+					</tbody>
+				</table>
+				<div id="example" style="text-align: right">
+					<ul id="pageLimit"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+	合计总价格：<span id="count"></span>
+</body>
+</html>
