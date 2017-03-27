@@ -72,4 +72,19 @@ public class OutServiceImpl implements OutService {
 		return outDao.count(hql);
 	}
 
+	@Override
+	public List<OutModel> downloadExcel(int state, int peopleid, String roleName) {
+		String hql = "from OutModel p ";
+		if(state != -1){
+			hql += "where state =" + state;
+		}
+		if(state != -1 && roleName.equals("staff")){
+			hql += " and staffId = "+peopleid;
+		}
+		if(state == -1 && roleName.equals("staff")){
+			hql += "where staffId =" + peopleid;
+		}
+		return outDao.selectList(hql);
+	}
+
 }

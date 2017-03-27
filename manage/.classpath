@@ -42,5 +42,6 @@
 	<classpathentry kind="lib" path="E:/mvcsh/libs/spring-tx-4.1.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="E:/mvcsh/libs/spring-web-4.1.6.RELEASE.jar"/>
 	<classpathentry kind="lib" path="E:/mvcsh/libs/spring-webmvc-4.1.6.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/soft/jar/poi-bin-3.16-beta2-20170202/poi-3.16-beta2/poi-3.16-beta2.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

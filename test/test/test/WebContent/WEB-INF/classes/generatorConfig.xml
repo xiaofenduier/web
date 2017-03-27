@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+	<classPathEntry location="C:/Users/lj/Desktop/1/test/test/test/WebContent/WEB-INF/lib/mysql-connector-java-5.1.18.jar" />
+
+	<context id="DB2Tables" targetRuntime="MyBatis3">
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://localhost:3306/test?useUnicode=true" 
+			userId="root" password="123">
+		</jdbcConnection>
+
+		<javaModelGenerator targetPackage="com.web.order.model"
+			targetProject="test/src">
+		</javaModelGenerator>
+
+		<sqlMapGenerator targetPackage="mapping"
+			targetProject="test/src">
+		</sqlMapGenerator>
+
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="com.web.order.dao" targetProject="test/src">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+		<table schema="DB2ADMIN" tableName="t_cp" domainObjectName="Cp"></table>
+		<table schema="DB2ADMIN" tableName="t_information" domainObjectName="Information"></table>
+		<table schema="DB2ADMIN" tableName="t_message" domainObjectName="Message"></table>
+		<table schema="DB2ADMIN" tableName="t_mycp" domainObjectName="MyCp"></table>
+		<table schema="DB2ADMIN" tableName="t_notice" domainObjectName="Notice"></table>
+		<table schema="DB2ADMIN" tableName="t_order" domainObjectName="Order"></table>
+		<table schema="DB2ADMIN" tableName="t_shop" domainObjectName="Shop"></table>
+		<table schema="DB2ADMIN" tableName="t_shopcar" domainObjectName="ShopCar"></table>
+		<table schema="DB2ADMIN" tableName="t_user" domainObjectName="User"></table>
+		<table schema="DB2ADMIN" tableName="t_vote" domainObjectName="Vote"></table>
+		
+		
+	</context>
+</generatorConfiguration>

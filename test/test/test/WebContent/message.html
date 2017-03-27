@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap-paginator.min.js"></script>
+<script type="text/javascript" src="view/js/moment.js"></script>
+<script type="text/javascript" src="view/js/daterangepicker.js"></script>
+
+<link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="view/css/daterangepicker-bs3.css"/>
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="view/css/templatemo_main.css">
+<title>订餐后台管理系统</title>
+</head>
+<body>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			initTable();
+		});
+
+		function login(){
+			var loginusername = $("#loginusername").val();
+			var loginpassword = $("#loginpassword").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/login",
+				data : {
+					"username" :　loginusername,
+					"password" : loginpassword
+				},
+				error : function() {
+					alert('登录失败');
+				},
+				success : function(data) {
+					if(data == null){
+						alert("登录失败");
+					}else{
+						alert("登陆成功");
+						$("#modal-container-770388").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function add(){
+			var username = $("#username").val();
+			var phone = $("#phone").val();
+			var content = $("#content").val();
+			var reply = $("#reply").val();
+			if(username == ""){
+				alert("用户名");
+				return;
+			}
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "message/add",
+				data : {
+					"username" : username,
+					"phone" : phone,
+					"content" : content,
+					"reply" : reply,
+				},
+				error : function() {
+					alert('请求失败');
+					$("#modal-container-586988").modal("toggle");
+				},
+				success : function(data) {
+					if(data > 0){
+						alert("增加成功");
+						$("#modal-container-586988").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function initTable() {
+			var roleName;
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/getUser",
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+					if(data.data == null){
+						$("#modal-container-770388").modal();
+					}else{
+						roleName = data.data.roleName;
+						peoplename = data.data.username;
+						var tbody = "";
+						var tbodywithpage = "";
+						$.ajax({
+							type : 'POST',
+							dataType : "json",
+							url : "message/selectwithpage",
+							data : {
+								"currentPage" : 1,
+								"pageSize" : 5,
+								"shopname":peoplename
+							},
+							error : function() {
+								alert('请求失败');
+							},
+							success : function(data) {
+								var result = data.data;
+								var thead = "<tr><th>用户名</th><th>电话</th><th>留言</th><th>回复</th><th>操作</th></tr>";
+								$.each(result, function(i, resultObj) {
+									if (i % 2 == 0) {
+										tbody += "<tr class = 'success'><td> "+ resultObj.username+ " </td><td> " + resultObj.phone+ " </td><td>"+ resultObj.content+ "</td><td>" + resultObj.reply+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultObj.id+")>回复</button></td></tr>";
+									} else {
+										tbody += "<tr class = 'info'><td> "+ resultObj.username+ " </td><td> " + resultObj.phone+ " </td><td>"+ resultObj.content+ "</td><td>" + resultObj.reply+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultObj.id+")>回复</button></td></tr>";
+									}
+								});
+								$("#thead").html(thead);
+								$("#tbody").html(tbody);
+								var pageSize = data.pageSize;
+								var pageCount = data.pageCount;
+								var currentPage = data.currentPage;
+								var options = {
+									currentPage : currentPage,
+									totalPages : pageCount,
+									size : "normal",
+									bootstrapMajorVersion : 3,
+									alignment : "right",
+									numberOfPages : pageSize,
+									itemTexts : function(type, page, current) {
+										switch (type) {
+										case "first":
+											return "首页";
+										case "prev":
+											return "上一页";
+										case "next":
+											return "下一页";
+										case "last":
+											return "末页";
+										case "page":
+											return page;
+										}
+									},
+									//点击事件，用于通过Ajax来刷新整个list列表
+									onPageClicked : function(event, originalEvent,type, page) {
+										$.ajax({
+											url : "message/selectwithpage",
+											type : "POST",
+											data : {
+												"currentPage" : page,
+												"pageSize" : pageSize,
+												"shopname":peoplename
+											},
+											success : function(data) {
+												var resultwithpage = data.data;
+												$.each(resultwithpage,function(j,resultwithpageObj) {
+														if (j % 2 == 0) {
+															tbodywithpage += "<tr class = 'success'><td> "+ resultwithpageObj.username+ " </td><td> "+ resultwithpageObj.phone+ " </td><td>"+ resultwithpageObj.content+ "</td><td>"+ resultwithpageObj.reply+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultwithpageObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultwithpageObj.id+")>回复</button></td></tr>";
+														} else {
+															tbodywithpage += "<tr class = 'info'><td> "+ resultwithpageObj.username+ " </td><td> "+ resultwithpageObj.phone+ " </td><td>"+ resultwithpageObj.content+ "</td><td>"+ resultwithpageObj.reply+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultwithpageObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultwithpageObj.id+")>回复</button></td></tr>";
+														}
+													});
+													$("#tbody").html(tbodywithpage);
+													tbodywithpage = "";
+												}
+											});
+										}
+									};
+									$('#pageLimit').bootstrapPaginator(options);
+								}
+							});
+					}
+				}
+			});
+		}
+		                    /* 删除 */
+		function del(id){
+		    $("#modal-container-770346").modal();
+		    alert(id);
+		    $("#remove").click(function(){
+		        $.ajax({
+		            type: 'post',
+		            url: 'message/delete',
+		            cache:false,
+		            dataType : 'json',
+		            data:{"id":id},
+		            success: function(data){
+		                $("#modal-container-770346").modal("toggle");
+		                window.location.reload();
+		            }
+		        });
+		    });
+		}
+		                    /* 修改 */
+		function update(id){
+		    $.ajax({
+	            type: 'post',
+	            url: 'message/select',
+	            cache:false,
+	            dataType : 'json',
+	            data:{"id":id},
+	            success: function(data){
+	            	var result = data.data;
+	            	$("#modal-container-770347").modal();
+	            	$("#upd_username").val(result.username);
+	            	$("#upd_phone").val(result.phone);
+	            	$("#upd_content").val(result.content);
+	            	$("#upd_reply").val(result.reply);
+	            	
+	            	$("#update").click(function(){
+	    		        $.ajax({
+	    		            type: 'post',
+	    		            url: 'message/update',
+	    		            cache:false,
+	    		            dataType : 'json',
+	    		            data:{
+	    		            	"id":id,
+	    		            	"username" :$("#upd_username").val(),
+	    		            	"phone" :$("#upd_phone").val(),
+	    		            	"content" :$("#upd_content").val(),
+	    		            	"reply": $("#upd_reply").val()
+	    		            },
+	    		            success: function(data){
+	    		                $("#modal-container-770347").modal("toggle");
+	    		                window.location.reload();
+	    		            }
+	    		        });
+	    		    }); 
+	            }
+	        });
+		}
+	</script>
+<div id="main-wrapper">
+<div class="navbar navbar-inverse" role="navigation">
+      <div class="navbar-header">
+        <div class="logo"><h1>订餐后台管理系统</h1></div>
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">订餐后台管理系统</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button> 
+      </div>   
+</div>
+   <div class="template-page-wrapper">
+      <div class="navbar-collapse collapse templatemo-sidebar">
+        <ul class="templatemo-sidebar-menu">
+          	<li><a href="index.html"><i class="fa fa-home"></i>首页</a></li>
+			<li class="active"><a href="message.html"><i class="fa fa-cubes"></i>留言管理</a></li>
+			<li><a href="notice.html"><i class="fa fa-map-marker"></i>公告管理</a></li>
+			<li><a href="user.html"><i class="fa fa-users"></i>会员管理</a></li>
+			<li><a href="order.html"><i class="fa fa-cog"></i>订单管理</a></li>
+			<li><a href="cp.html"><i class="fa fa-cog"></i>菜品管理</a></li>
+        </ul>
+      </div>	
+	<!-- 新增 -->
+<div class="templatemo-content-wrapper">
+<div class="templatemo-content">
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<a id="modal-586988" href="#modal-container-586988" role="button"
+					class="btn btn-default" data-toggle="modal">增加留言</a>
+
+				<div class="modal fade" id="modal-container-586988" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">增加留言</h4>
+							</div>
+							<div class="modal-body">
+								<form role="form">
+									<div class="form-group">
+										<label for="exampleInputEmail1">用户名</label><input
+											type="email" id = "username" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">电话</label><input
+											type="email" id = "phone" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">内容</label><input type="email"
+											class="form-control" id="content" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">回复</label><input type="email"
+											class="form-control" id="reply" />
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" id = "save" class="btn btn-primary" onclick="add()">保存</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+                                          <!-- 登录 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770388" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								请您先登录
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form" style = "width:500px">
+				<div class="form-group">
+					 <label for="exampleInputEmail1">用户名</label><input type="text" id = "loginusername" class="form-control"/>
+				</div>
+				<div class="form-group">
+					 <label for="exampleInputPassword1">密码</label><input type="password" id = "loginpassword" class="form-control"/>
+				</div>
+				<button type="button" class="btn btn-default" onclick="login()">登录</button>
+			</form>
+							</div></p>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	                             <!-- 删除 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770346" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								删除！
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p id = "delete">确认删除？</p>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> <button type="button" class="btn btn-primary" id = "remove">确认</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	                         <!-- 修改 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770347" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								修改
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form">
+									<div class="form-group">
+										<label for="exampleInputEmail1">用户名</label><input
+											type="email" readyonly id = "upd_username" class="form-control" />
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">电话</label><input
+											type="email" readyonly id = "upd_phone" class="form-control" />
+									</div>
+									
+									<div class="form-group">
+										<label for="exampleInputEmail1">内容</label><input type="email"
+											class="form-control" readyonly id="upd_content" />
+									</div>
+									
+									<div class="form-group">
+										<label for="exampleInputEmail1">回复</label><input type="email"
+											class="form-control" readyonly id="upd_reply" />
+									</div>
+								</form>
+							</div></p>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> <button type="button" class="btn btn-primary" id = "update">保存修改</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<!-- 表格 -->
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table">
+					<thead id="thead">
+
+					</thead>
+					<tbody id="tbody">
+
+					</tbody>
+				</table>
+				<div id="example" style="text-align: right">
+					<ul id="pageLimit"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+</div></div></div>
+</div>
+</body>
+</html>

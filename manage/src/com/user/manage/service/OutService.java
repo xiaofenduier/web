@@ -18,5 +18,8 @@ public interface OutService {
 	    void update(OutModel buy);
 	    
 	    Long count(int state);
+	    
 	    Long countwithstate(int staffId, int state);
+	    
+	    List<OutModel> downloadExcel(int state, int peopleid, String roleName);
 }
