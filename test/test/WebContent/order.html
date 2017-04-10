@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/js/bootstrap-paginator.min.js"></script>
+<script type="text/javascript" src="view/js/moment.js"></script>
+<script type="text/javascript" src="view/js/daterangepicker.js"></script>
+<script src="view/js/moment-with-locales.min.js"></script> 
+<script type="text/javascript" src="view/js/bootstrap-datetimepicker.min.js"></script>
+
+<link href="http://www.jq22.com/jquery/font-awesome.4.6.0.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="view/css/daterangepicker-bs3.css"/>
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="view/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="view/css/templatemo_main.css">
+<link rel="stylesheet" href="view/css/bootstrap-datetimepicker.min.css" />
+<title>Insert title here</title>
+</head>
+<body>
+	<script type="text/javascript">
+	var peoplename;
+		$(document).ready(function() {
+			$('#datetimepicker').datetimepicker({
+                format: 'LT'
+            });
+			initTable();
+		});
+
+		function login(){
+			var loginusername = $("#loginusername").val();
+			var loginpassword = $("#loginpassword").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/login",
+				data : {
+					"username" :　loginusername,
+					"password" : loginpassword
+				},
+				error : function() {
+					alert('登录失败');
+				},
+				success : function(data) {
+					if(data == null){
+						alert("登录失败");
+					}else{
+						alert("登陆成功");
+						$("#modal-container-770388").modal("toggle");
+						window.location.reload();
+					}
+				}
+			});
+		}
+		
+		function initTable() {
+			var roleName;
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/getUser",
+				error : function() {
+					alert('请求失败');
+				},
+				success : function(data) {
+					if(data.data == null){
+						$("#modal-container-770388").modal();
+					}else{
+						roleName = data.data.rolename;
+						peoplename = data.data.username;
+						if (roleName == "root"){
+							$("#user").show();
+							$("#notice").show();
+						}else if(roleName == "shopper"){
+							$("#order").show();
+							$("#cp").show();
+						}
+						var tbody = "";
+						var tbodywithpage = "";
+						var enforce = "";
+						var ispay = "";
+						var status = $("#select").val();
+						if(status == 1){
+							ispay = 0;
+						}
+						if(status == 2){
+							ispay = 1;
+						}
+						if(status == 3){
+							enforce = 0;
+						}
+						if(status == 4){
+							enforce = 1;
+						}
+						if(status == -1){
+							enforce = "";
+							ispay = "";
+						}
+						$.ajax({
+							type : 'POST',
+							dataType : "json",
+							url : "order/selectwithpage",
+							data : {
+								"currentPage" : 1,
+								"pageSize" : 5,
+								"enforce" : enforce,
+								"ispay" : ispay,
+								"shopid":peoplename
+							},
+							error : function() {
+								alert('请求失败');
+							},
+							success : function(data) {
+								var result = data.data;
+								var thead = "<tr><th>编号</th><th>用户名</th><th>菜品</th><th>订单时间</th><th>是否执行</th><th>是否付款</th><th>预计配送时间</th><th>数量</th><th>操作</th></tr>";
+								$.each(result, function(i, resultObj) {
+									if (i % 2 == 0) {
+										tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.username+ " </td><td> " + resultObj.cpname+ " </td><td>"+resultObj.orderdata+"</td><td>"+resultObj.enforce+"</td><td>"+resultObj.ispay+"</td><td>"+resultObj.time+"</td><td>"+resultObj.num+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>配送</button></td></tr>";
+									} else {
+										tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.username+ " </td><td> " + resultObj.cpname+ " </td><td>"+resultObj.orderdata+"</td><td>"+resultObj.enforce+"</td><td>"+resultObj.ispay+"</td><td>"+resultObj.time+"</td><td>"+resultObj.num+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>配送</button></td></tr>";
+									}
+								});
+								
+								$("#thead").html(thead);
+								$("#tbody").html(tbody);
+								var pageSize = data.pageSize;
+								var pageCount = data.pageCount;
+								var currentPage = data.currentPage;
+								var options = {
+									currentPage : currentPage,
+									totalPages : pageCount,
+									size : "normal",
+									bootstrapMajorVersion : 3,
+									alignment : "right",
+									numberOfPages : pageSize,
+									itemTexts : function(type, page, current) {
+										switch (type) {
+										case "first":
+											return "首页";
+										case "prev":
+											return "上一页";
+										case "next":
+											return "下一页";
+										case "last":
+											return "末页";
+										case "page":
+											return page;
+										}
+									},
+									//点击事件，用于通过Ajax来刷新整个list列表
+									onPageClicked : function(event, originalEvent,type, page) {
+										$.ajax({
+											url : "order/selectwithpage",
+											type : "POST",
+											data : {
+												"currentPage" : page,
+												"pageSize" : pageSize,
+												"enforce" : enforce,
+												"ispay" : ispay,
+												"shopid":peoplename
+											},
+											success : function(data) {
+												var resultwithpage = data.data;
+												$.each(resultwithpage,function(j,resultwithpageObj) {
+													if (j % 2 == 0) {
+														tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id + "</td><td> "+ resultwithpageObj.username+ " </td><td> " + resultwithpageObj.cpname+ " </td><td>"+resultwithpageObj.orderdata+"</td><td>"+resultwithpageObj.enforce+"</td><td>"+resultwithpageObj.ispay+"</td><td>"+resultwithpageObj.time+"</td><td> "+ resultwithpageObj.num+ " </td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>配送</button></td></tr>";
+													} else {
+														tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id + "</td><td> "+ resultwithpageObj.username+ " </td><td> " + resultwithpageObj.cpname+ " </td><td>"+resultwithpageObj.orderdata+"</td><td>"+resultwithpageObj.enforce+"</td><td>"+resultwithpageObj.ispay+"</td><td>"+resultwithpageObj.time+"</td><td> "+ resultwithpageObj.num+ " </td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>配送</button></td></tr>";
+													}
+												});
+												$("#tbody").html(tbodywithpage);
+												tbodywithpage = "";
+											}
+										});
+									}
+								};
+								$('#pageLimit').bootstrapPaginator(options);
+							}
+						});
+					}
+				}
+			});
+		}
+		                    /* 配送*/
+		function virtify(id){
+		    $.ajax({	      
+      			type: 'post',
+	            url: 'order/select',
+	            cache:false,
+	            dataType : 'json',
+	            data:{"id":id},
+	            success: function(data){
+	            	var result = data.data;
+	            	if (result[0].ispay != 1){
+	            		alert("未付款，不能配送");
+	            		return;
+	            	}
+	            	$("#modal-container-770348").modal("toggle");
+	            	$("#ok").click(function(){
+	    		        $.ajax({
+	    		            type: 'post',
+	    		            url: 'order/update',
+	    		            cache:false,
+	    		            dataType : 'json',
+	    		            data:{
+	    		            	"id":result[0].id,
+	    		            	"username" : result[0].username,
+	    		            	"orderdata" :result[0].orderdata,
+	    		            	"enforce" : 1,
+	    		            	"ispay" : result[0].ispay,
+	    		            	"cpname" : result[0].cpname,
+	    		            	"num" : result[0].num,
+	    		            	"time" : $("#datetimepicker").val(),
+	    		            	"shopid":result[0].shopid
+	    		            },
+	    		            success: function(data){
+	    		                window.location.reload();
+	    		            }
+	    		        });
+	    		    }); 
+	            }
+	        });
+		}
+	</script>
+<div id="main-wrapper">
+<div class="navbar navbar-inverse" role="navigation">
+      <div class="navbar-header">
+        <div class="logo"><h1>订餐后台管理系统</h1></div>
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">订餐后台管理系统</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button> 
+      </div>   
+</div>
+   <div class="template-page-wrapper">
+      <div class="navbar-collapse collapse templatemo-sidebar">
+        <ul class="templatemo-sidebar-menu">
+            <li><a href="index.html"><i class="fa fa-home"></i>首页</a></li>
+			<li id= "message" style="display:none"><a href="message.html"><i class="fa fa-cubes"></i>留言管理</a></li>
+			<li id = "notice" style="display:none"><a href="notice.html"><i class="fa fa-map-marker"></i>公告管理</a></li>
+			<li id = "user" style="display:none"><a href="user.html"><i class="fa fa-users"></i>会员管理</a></li>
+			<li class="active" id= "order" style="display:none"><a href="order.html"><i class="fa fa-cog"></i>订单管理</a></li>
+			<li id= "cp" style="display:none"><a href="cp.html"><i class="fa fa-cog"></i>菜品管理</a></li>
+        </ul>
+      </div>
+<div class="templatemo-content-wrapper">
+<div class="templatemo-content">
+
+                                          <!-- 登录 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770388" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								请您先登录
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p><div class="modal-body">
+								<form role="form" style = "width:500px">
+				<div class="form-group">
+					 <label for="exampleInputEmail1">用户名</label><input type="text" id = "loginusername" class="form-control"/>
+				</div>
+				<div class="form-group">
+					 <label for="exampleInputPassword1">密码</label><input type="password" id = "loginpassword" class="form-control"/>
+				</div>
+				<button type="button" class="btn btn-default" onclick="login()">登录</button>
+			</form>
+							</div></p>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+                                  <!-- 搜索 -->
+<div class="container" style="width:300px"><div class="row clearfix"><div class="col-md-12 column">
+<form role="form">
+	<div class="form-group">
+	<dl class="dl-horizontal">
+		<dt><select class="form-control" id = "select">
+		    <option value="-1">所有状态</option>
+			<option value="1">未付款</option>
+			<option value="2">已付款</option>
+			<option value="3">未配送</option>
+			<option value="4">已配送</option>
+		</select></dt>
+		<dd><button type="button" id = "search" class="btn btn-default" onclick = "initTable()">搜索</button></dd>
+    </dl>
+	</div>
+</form>
+</div></div></div>
+
+	                              <!-- 执行 -->
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="modal fade" id="modal-container-770348" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							<h4 class="modal-title" id="myModalLabel">
+								配送！
+							</h4>
+						</div>
+						<div class="modal-body">
+							<form role="form">
+								<div class="form-group">
+									<label for="exampleInputEmail1">选择配送时间</label>
+									<input type="text" id="datetimepicker">
+								</div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button> <button type="button" class="btn btn-primary" id = "ok">确认</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<!-- 表格 -->
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table">
+					<thead id="thead">
+
+					</thead>
+					<tbody id="tbody">
+
+					</tbody>
+				</table>
+				<div id="example" style="text-align: right">
+					<ul id="pageLimit"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+</div></div></div></div>
+</body>
+</html>
