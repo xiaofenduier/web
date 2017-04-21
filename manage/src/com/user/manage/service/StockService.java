@@ -17,4 +17,6 @@ public interface StockService {
 	    void update(StockModel buy);
 	    
 	    Long count();
+	    
+	    List<StockModel> select(String name);
 }

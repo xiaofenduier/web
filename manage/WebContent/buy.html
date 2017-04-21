@@ -21,7 +21,26 @@
 		$(document).ready(function() {
 			initTable();
 		});
-
+		
+		function xianshi(){
+			$("#modal-container-586989").modal();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "production/select4list",
+				error : function() {
+					alert('查询失败');
+				},
+				success : function(data) {
+					var str = "";
+					$.each(data, function(i, result) {
+						str = str + "<option>"+result.username+"</option>";
+					});
+					$("#username").html(str);
+				}
+			});
+		}
+		
 		function login(){
 			var loginusername = $("#loginusername").val();
 			var loginpassword = $("#loginpassword").val();
@@ -124,22 +143,41 @@
 							},
 							success : function(data) {
 								var result = data.value;
+								var states;
 								if(roleName == "root" || roleName == "manager"){
 									var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>来源</th><th>审核状态</th><th>操作</th></tr>";
 									$.each(result, function(i, resultObj) {
+										if(resultObj.state == 1){
+											states = "通过";
+										}
+										if(resultObj.state == 2){
+											states = "拒绝";
+										}
+										if(resultObj.state == 0){
+											states = "待审核";
+										}
 										if (i % 2 == 0) {
-											tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>审核</button></td></tr>";
+											tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+states+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>审核</button></td></tr>";
 										} else {
-											tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>审核</button></td></tr>";
+											tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+states+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultObj.id+")>审核</button></td></tr>";
 										}
 									});
 								}else if(roleName == "staff"){
 									var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>来源</th><th>审核状态</th></tr>";
 									$.each(result, function(i, resultObj) {
+										if(resultObj.state == 1){
+											states = "通过";
+										}
+										if(resultObj.state == 2){
+											states = "拒绝";
+										}
+										if(resultObj.state == 0){
+											states = "待审核";
+										}
 										if (i % 2 == 0) {
-											tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td></tr>";
+											tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+states+"</td><td></tr>";
 										} else {
-											tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+resultObj.state+"</td><td></tr>";
+											tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.name+ " </td><td> " + resultObj.num+ " </td><td>" + resultObj.company+ "</td><td>"+states+"</td><td></tr>";
 										}
 									});
 								}
@@ -183,22 +221,41 @@
 												"roleName" : roleName
 											},
 											success : function(data) {
+												var states;
 												var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>审核状态</th><th>操作人</th><th>操作</th></tr>";
 												var resultwithpage = data.value;
 												if(roleName == "root" || roleName == "manager"){
 													$.each(resultwithpage,function(j,resultwithpageObj) {
+														if(resultwithpageObj.state == 1){
+															states = "通过";
+														}
+														if(resultwithpageObj.state == 2){
+															states = "拒绝";
+														}
+														if(resultwithpageObj.state == 0){
+															states = "待审核";
+														}
 														if (j % 2 == 0) {
-															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>审核</button></td></tr>";
+															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+states+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>审核</button></td></tr>";
 														} else {
-															tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>审核</button></td></tr>";
+															tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+states+"</td><td><button id='virtify' role='button' class='btn' data-toggle='modal' onclick=virtify("+resultwithpageObj.id+")>审核</button></td></tr>";
 														}
 												    });
 												}else if(roleName == "staff"){
 													$.each(resultwithpage,function(j,resultwithpageObj) {
+														if(resultwithpageObj.state == 1){
+															states = "通过";
+														}
+														if(resultwithpageObj.state == 2){
+															states = "拒绝";
+														}
+														if(resultwithpageObj.state == 0){
+															states = "待审核";
+														}
 														if (j % 2 == 0) {
-															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td></tr>";
+															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+states+"</td><td></tr>";
 														} else {
-															tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+resultwithpageObj.state+"</td><td></tr>";
+															tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.name+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ resultwithpageObj.company+ "</td><td>"+states+"</td><td></tr>";
 														}
 												    });
 												}
@@ -299,7 +356,7 @@
           <li class="active"><a href="buy.html"><i class="fa fa-map-marker"></i>进货管理</a></li>
           <li><a href="out.html"><i class="fa fa-users"></i>出货管理</a></li>
           <li><a href="stock.html"><i class="fa fa-cog"></i>库存管理</a></li>
-          <li id ="quanxian"><a href="user.html"><i class="fa fa-cog"></i>权限管理</a></li>
+          <li id ="quanxian"  style = "display:none"><a href="user.html"><i class="fa fa-cog"></i>权限管理</a></li>
         </ul>
       </div>
 <div class="templatemo-content-wrapper">
@@ -342,8 +399,8 @@
 	<div class="container">
 		<div class="row clearfix">
 			<div class="col-md-12 column">
-				<a id="modal-586989" href="#modal-container-586989" role="button"
-					class="btn btn-default" data-toggle="modal">填写采购单</a>
+				<a id="modal-586989" href="javascript:void(0)" role="button"
+					class="btn btn-default" data-toggle="modal" onclick="xianshi()">填写采购单</a>
 
 				<div class="modal fade" id="modal-container-586989" role="dialog"
 					aria-labelledby="myModalLabel" aria-hidden="true">
@@ -357,8 +414,10 @@
 							<div class="modal-body">
 								<form role="form">
 									<div class="form-group">
-										<label for="exampleInputEmail1">产品名称</label><input
-											type="email" id = "username" class="form-control" />
+										<label for="exampleInputEmail1">产品名称</label>
+										<select class="selectpicker" id = "username" style = "width:568px;height:34px">
+											
+										</select>
 									</div>
 									<div class="form-group">
 										<label for="exampleInputEmail1">产品数量</label><input

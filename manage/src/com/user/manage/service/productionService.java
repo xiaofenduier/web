@@ -18,4 +18,8 @@ public interface productionService {
     void update(productionModel production);
     
     Long count();
+    
+    List<productionModel> select(String name);
+    
+    List<productionModel> select4List();
 }

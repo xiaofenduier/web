@@ -130,4 +130,10 @@ public class productionController {
 		return result;
 	}
 
+	@ResponseBody
+	@RequestMapping("select4list")
+	public List<productionModel> select4List(HttpServletRequest request){
+		List<productionModel> productionModelList = productionService.select4List();
+		return productionModelList;
+	}
 }

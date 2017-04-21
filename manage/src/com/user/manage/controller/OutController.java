@@ -18,7 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.user.manage.model.OutModel;
+import com.user.manage.model.StockModel;
+import com.user.manage.model.productionModel;
 import com.user.manage.service.OutService;
+import com.user.manage.service.StockService;
+import com.user.manage.service.productionService;
 
 @Controller
 @RequestMapping("/out")
@@ -28,12 +32,20 @@ private static final Logger logger = Logger.getLogger(OutController.class);
 	@Resource
 	private OutService outService;
 	
+	@Resource
+	private productionService productionService;
+	
 	@ResponseBody
 	@RequestMapping("add")
 	public int add(HttpServletRequest request) throws Exception{
 		String name = request.getParameter("name");
 		int num = Integer.parseInt(request.getParameter("num"));
 		OutModel out = new OutModel();
+		List<productionModel> slist= productionService.select(name);
+		System.out.println(slist);
+		if(slist.isEmpty()){
+			return -1;
+		}
 		int staffId = Integer.parseInt(request.getParameter("staffId"));
 		int state = 0;
 		out.setStaffId(staffId);

@@ -54,4 +54,16 @@ public class productionServiceImpl implements productionService {
 		return productionDao.count(hql);
 	}
 
+	@Override
+	public List<productionModel> select(String name) {
+		String hql = "from productionModel p where p.username = "+name;
+		return productionDao.selectList(hql);
+	}
+
+	@Override
+	public List<productionModel> select4List() {
+		String hql = "from productionModel p";
+		return productionDao.selectList(hql);
+	}
+
 }

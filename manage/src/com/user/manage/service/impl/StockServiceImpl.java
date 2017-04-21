@@ -51,4 +51,10 @@ public class StockServiceImpl implements StockService {
 		return stockDao.count(hql);
 	}
 
+	@Override
+	public List<StockModel> select(String name) {
+		String hql = "from StockModel p where p.name = "+name;
+		return stockDao.selectList(hql);
+	}
+
 }
