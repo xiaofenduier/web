@@ -33,12 +33,10 @@
 					"username" :　loginusername,
 					"password" : loginpassword
 				},
-				error : function() {
-					alert('登录失败');
-				},
 				success : function(data) {
 					if(data == null){
-						alert("登录失败");
+						location.href = "production.html";
+						return;
 					}else{
 						alert("登陆成功");
 						$("#modal-container-770388").modal("toggle");
@@ -50,9 +48,6 @@
 		
 		function add(){
 			var username = $("#username").val();
-			var num = $("#num").val();
-			var productionTime = $("#productionTime").val();
-			var expirationTime = $("#expirationTime").val();
 			var company = $("#company").val();
 			var inTime = $("#inTime").val();
 			if(username == ""){
@@ -65,9 +60,9 @@
 				url : "production/add",
 				data : {
 					"username" : username,
-					"num" : num,
-					"productionTime" : productionTime,
-					"expirationTime" : expirationTime,
+					"num" : 0,
+					"productionTime" : "",
+					"expirationTime" : 999,
 					"company" : company,
 					"inTime" : inTime
 				},
@@ -142,12 +137,12 @@
 							},
 							success : function(data) {
 								var result = data.value;
-								var thead = "<tr><th>编号</th><th>产品名称</th><th>数量</th><th>生产日期</th><th>有效期</th><th>入库时间</th><th>来源</th><th>操作</th></tr>";
+								var thead = "<tr><th>编号</th><th>产品名称</th><th>修改时间</th><th>来源</th><th>操作</th></tr>";
 								$.each(result, function(i, resultObj) {
 									if (i % 2 == 0) {
-										tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.username+ " </td><td> " + resultObj.num+ " </td><td>"+ getTime(resultObj.productTime) + "</td><td>"+ resultObj.expirationTime+ "</td><td>" + getTime(resultObj.inTime)+ "</td><td>" + resultObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultObj.id+")>修改</button></td></tr>";
+										tbody += "<tr class = 'success'><td>"+ resultObj.id + "</td><td> "+ resultObj.username+ " </td><td>" + getTime(resultObj.inTime)+ "</td><td>" + resultObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultObj.id+")>修改</button></td></tr>";
 									} else {
-										tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.username+ " </td><td> " + resultObj.num+ " </td><td>"+ getTime(resultObj.productTime)+ "</td><td>"+ resultObj.expirationTime+ "</td><td>" + getTime(resultObj.inTime)+ "</td><td>" + resultObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultObj.id+")>修改</button></td></tr>";
+										tbody += "<tr class = 'info'><td>"+ resultObj.id + "</td><td> "+ resultObj.username+ " </td><td>" + getTime(resultObj.inTime)+ "</td><td>" + resultObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultObj.id+")>修改</button></td></tr>";
 									}
 								});
 								$("#thead").html(thead);
@@ -191,9 +186,9 @@
 													resultwithpage,
 													function(j,resultwithpageObj) {
 														if (j % 2 == 0) {
-															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.username+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ getTime(resultwithpageObj.productTime)+ "</td><td>"+ resultwithpageObj.expirationTime+ "</td><td>"+ getTime(resultwithpageObj.inTime)+ "</td><td>"+ resultwithpageObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultwithpageObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultwithpageObj.id+")>修改</button></td></tr>";
+															tbodywithpage += "<tr class = 'success'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.username+ " </td><td>"+ getTime(resultwithpageObj.inTime)+ "</td><td>"+ resultwithpageObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultwithpageObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultwithpageObj.id+")>修改</button></td></tr>";
 														} else {
-																tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.username+ " </td><td> "+ resultwithpageObj.num+ " </td><td>"+ getTime(resultwithpageObj.productTime)+ "</td><td>"+ resultwithpageObj.expirationTime+ "</td><td>"+ getTime(resultwithpageObj.inTime)+ "</td><td>"+ resultwithpageObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultwithpageObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultwithpageObj.id+")>修改</button></td></tr>";
+																tbodywithpage += "<tr class = 'info'><td>"+ resultwithpageObj.id+ "</td><td> "+ resultwithpageObj.username+ " </td><td>"+ getTime(resultwithpageObj.inTime)+ "</td><td>"+ resultwithpageObj.company+ "</td><td><button id='d' role='button' class='btn' data-toggle='modal' onclick=del("+resultwithpageObj.id+")>删除</button><button id='upda' role='button' class='btn' data-toggle='modal' onclick=update("+resultwithpageObj.id+")>修改</button></td></tr>";
 														}
 													});
 													$("#tbody").html(tbodywithpage);
@@ -228,6 +223,17 @@
 		        });
 		    });
 		}
+		function zhuxiao(){
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "user/zhuxiao",
+				success : function(data) {
+					location.href = "index.html";
+				}
+			});
+		}
+		                    
 		                    /* 修改 */
 		function update(id){
 		    $.ajax({
@@ -275,7 +281,9 @@
 <div id="main-wrapper">
 <div class="navbar navbar-inverse" role="navigation">
       <div class="navbar-header">
-        <div class="logo"><h1>库存管理系统</h1></div>
+        <div class="logo"><h1>库存管理系统</h1>
+        <button type="button" class="btn btn-default" style = "margin-top:-55px;margin-left:1000px" onclick="zhuxiao()">注销</button>
+        </div>
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
           <span class="sr-only">库存管理系统</span>
           <span class="icon-bar"></span>
@@ -302,7 +310,7 @@
 		<div class="row clearfix">
 			<div class="col-md-12 column">
 				<a id="modal-586988" href="#modal-container-586988" role="button"
-					class="btn btn-default" data-toggle="modal">增加产品入库</a>
+					class="btn btn-default" data-toggle="modal">增加产品</a>
 
 				<div class="modal fade" id="modal-container-586988" role="dialog"
 					aria-labelledby="myModalLabel" aria-hidden="true">
@@ -320,32 +328,7 @@
 											type="email" id = "username" class="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="exampleInputEmail1">产品数量</label><input
-											type="email" id = "num" class="form-control" />
-									</div>
-									<div class="form-group">
-										<label for="exampleInputEmail1">生产日期</label>
-										<form class="form-horizontal">
-											<fieldset>
-												<div class="control-group">
-													<div class="controls">
-														<div class="input-prepend input-group">
-															<span class="add-on input-group-addon"><i
-																class="glyphicon glyphicon-calendar fa fa-calendar"></i></span><input
-																type="email" readonly name="productionTime"
-																id="productionTime" class="form-control"/>
-														</div>
-													</div>
-												</div>
-											</fieldset>
-										</form>
-									</div>
-									<div class="form-group">
-										<label for="exampleInputEmail1">保质期</label><input type="email"
-											class="form-control" id="expirationTime" />
-									</div>
-									<div class="form-group">
-										<label for="exampleInputEmail1">入库时间</label>
+										<label for="exampleInputEmail1">修改时间</label>
 										<form class="form-horizontal">
 											<fieldset>
 												<div class="control-group">

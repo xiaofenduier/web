@@ -37,12 +37,10 @@ function login(){
 			"username" :　loginusername,
 			"password" : loginpassword
 		},
-		error : function() {
-			alert('登录失败');
-		},
 		success : function(data) {
 			if(data == null){
-				alert("登录失败");
+				location.href = "user.html";
+				return;
 			}else{
 				alert("登陆成功");
 				$("#modal-container-770388").modal("toggle");
@@ -51,7 +49,16 @@ function login(){
 		}
 	});
 }
-
+function zhuxiao(){
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "user/zhuxiao",
+		success : function(data) {
+			location.href = "index.html";
+		}
+	});
+}
 function init(){
 	$.ajax({
 		type : 'POST',
@@ -272,6 +279,7 @@ function initTable() {
 			<div class="navbar-header">
 				<div class="logo">
 					<h1>库存管理系统</h1>
+					<button type="button" class="btn btn-default" style = "margin-top:-55px;margin-left:1000px" onclick="zhuxiao()">注销</button>
 				</div>
 				<button type="button" class="navbar-toggle" data-toggle="collapse"
 					data-target=".navbar-collapse">

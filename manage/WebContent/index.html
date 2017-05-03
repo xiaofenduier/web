@@ -39,30 +39,6 @@ $(document).ready(function() {
 						validating : 'glyphicon glyphicon-refresh'
 					},
 				fields : {
-					Username : {
-						message : 'The username is not valid',
-						validators : {
-							notEmpty : {
-								message : '账户不能为空'
-							},
-							/* stringLength : {
-								min : 5,
-								max : 10,
-								message : '账号长度 5-10'
-							}, */
-							regexp : {
-								regexp : /^[a-zA-Z0-9_\.]+$/,
-								message : '只接受数字和字母 '
-							}
-						}
-					},
-					Password : {
-						validators : {
-							notEmpty : {
-								message : '密码不能为空'
-							}
-						}
-					},
 					captcha : {
 						validators : {
 							callback : {
@@ -130,6 +106,18 @@ $(document).ready(function() {
 		}
 	});
 });
+
+function zhuxiao(){
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "user/zhuxiao",
+		success : function(data) {
+			location.href = "index.html";
+		}
+	});
+}
+
 function login(){
 	var username = $("#username").val();
 	var password = $("#password").val();
@@ -167,6 +155,10 @@ function login(){
 						staffId : id
 					},
 					success : function(data1) {
+						if(data1 == null){
+							location.href = "index.html";
+							return;
+						}
 						outdCount = data1.outdCount;
 						outrCount = data1.outrCount;
 						buydCount = data1.buydCount;
@@ -190,6 +182,7 @@ function login(){
 			<div class="navbar-header">
 				<div class="logo">
 					<h1>库存管理系统</h1>
+					<button type="button" class="btn btn-default" style = "margin-top:-55px;margin-left:1000px" onclick="zhuxiao()">注销</button>
 				</div>
 				<button type="button" class="navbar-toggle" data-toggle="collapse"
 					data-target=".navbar-collapse">

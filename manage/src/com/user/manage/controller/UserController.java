@@ -26,6 +26,8 @@ public class UserController {
 	@Resource
 	private RoleService roleService;
 	
+	private int i = 1;
+	
 	@ResponseBody
 	@RequestMapping("login")
 	public UserModel login(HttpServletRequest request) throws Exception{
@@ -33,11 +35,24 @@ public class UserController {
 		String password = request.getParameter("password");
 		List<UserModel> userModelList = userService.selectList(username, password);
 		if(userModelList.size() > 0){
-			request.getSession().setAttribute("user", userModelList.get(0));
-			return userModelList.get(0);
+			if(i%2==0){
+				i++;
+				request.getSession().setAttribute("user", userModelList.get(0));
+				return userModelList.get(0);
+			}else{
+				i++;
+				return null;
+			}
 		}else{
 			return null;
 		}
+	}
+	
+	@ResponseBody
+	@RequestMapping("zhuxiao")
+	public int zhuxiao(HttpServletRequest request) throws Exception{
+		request.getSession().removeAttribute("user");
+		return 1;
 	}
 	
 	@ResponseBody
