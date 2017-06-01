@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- Meta, title, CSS, favicons, etc. -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>羽毛球馆管理系统</title>
+
+<!-- Bootstrap -->
+<link href="vendors/bootstrap/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<!-- Font Awesome -->
+<link href="vendors/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet">
+<!-- NProgress -->
+<link href="vendors/nprogress/nprogress.css" rel="stylesheet">
+
+<!-- Custom Theme Style -->
+<link href="build/css/custom.min.css" rel="stylesheet">
+<!-- jQuery -->
+<script src="vendors/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="vendors/bootstrap/dist/js/bootstrap-paginator.min.js"></script>
+<script>
+$(document).ready(function() {
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "user/islogin",
+		success : function(data) {
+			if(data == -1){
+				alert("请先登录!");
+				location.href = "userLogin.html";
+				return;
+			}else{
+				$("#loginname").html(data.username);
+			}
+		}
+	});
+	
+	initTable();
+});
+
+function initTable(){
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "user/selectwithpage",
+		data : {
+			"currentPage" : 1,
+			"pageSize" : 10
+		},
+		success : function(data) {
+			var result = data.data;
+			var thread = "<tr><th>编号</th><th>用户名</th><th>姓名</th><th>联系方式</th></tr>";
+			var tbody = "";
+			$.each(result, function(i, resultObj) {
+				if(i%2 == 0){
+					tbody += "<tr class = 'success'><td>"+resultObj.id+"</td><td>"+resultObj.username+"</td><td>"+resultObj.realname+"</td><td>"+resultObj.telphone+"</td></tr>";
+				}else{
+					tbody += "<tr class = 'info'><td>"+resultObj.id+"</td><td>"+resultObj.username+"</td><td>"+resultObj.realname+"</td><td>"+resultObj.telphone+"</td></tr>";
+				}
+			});
+			$("#thread").html(thread);
+			$("#tbody").html(tbody);
+			
+			var pageSize = data.pageSize;
+			var pageCount = data.pageCount;
+			var currentPage = data.currentPage;
+			var options = {
+				currentPage : currentPage,
+				totalPages : pageCount,
+				size : "normal",
+				bootstrapMajorVersion : 3,
+				alignment : "right",
+				numberOfPages : pageSize,
+				itemTexts : function(type, page, current) {
+					switch (type) {
+					case "first":
+						return "首页";
+					case "prev":
+						return "上一页";
+					case "next":
+						return "下一页";
+					case "last":
+						return "末页";
+					case "page":
+						return page;
+					}
+				},
+				//点击事件，用于通过Ajax来刷新整个list列表
+				onPageClicked : function(event, originalEvent,type, page) {
+					$.ajax({
+						type : 'POST',
+						dataType : "json",
+						url : "user/selectwithpage",
+						data : {
+							"currentPage" : page,
+							"pageSize" : pageSize
+						},
+						success : function(data) {
+							var resultwithpage = data.data;
+							var tbodywithpage = "";
+							$.each(resultwithpage, function(i, resultwithpageObj) {
+								if(i%2 == 0){
+									tbodywithpage += "<tr class = 'success'><td>"+resultwithpageObj.id+"</td><td>"+resultwithpageObj.username+"</td><td>"+resultwithpageObj.realname+"</td><td>"+resultwithpageObj.telphone+"</td></tr>";
+								}else{
+									tbodywithpage += "<tr class = 'info'><td>"+resultwithpageObj.id+"</td><td>"+resultwithpageObj.username+"</td><td>"+resultwithpageObj.realname+"</td><td>"+resultwithpageObj.telphone+"</td></tr>";
+								}
+							});
+							$("#tbody").html(tbodywithpage);
+						}
+					});
+				}
+			};
+			$('#pageLimit').bootstrapPaginator(options);
+		}
+	});
+}
+</script>
+
+</head>
+<body class="nav-md">
+	<div class="container body">
+		<div class="main_container">
+			<div class="col-md-3 left_col">
+				<div class="left_col scroll-view">
+					<div class="navbar nav_title" style="border: 0;">
+						<a href="index.html" class="site_title"><i class="fa fa-paw"></i>
+							<span>羽毛球馆管理系统</span></a>
+					</div>
+
+					<div class="clearfix"></div>
+
+					<!-- menu profile quick info -->
+					<div class="profile clearfix">
+						<div class="profile_pic">
+							<img src="images/img.jpg" alt="..."
+								class="img-circle profile_img">
+						</div>
+						<div class="profile_info">
+							<span>欢迎,</span>
+							<h2 id="loginname"></h2>
+						</div>
+					</div>
+					<!-- /menu profile quick info -->
+
+					<br />
+
+					<!-- sidebar menu -->
+					<div id="sidebar-menu"
+						class="main_menu_side hidden-print main_menu">
+						<div class="menu_section">
+							<h3>General</h3>
+							<ul class="nav side-menu">
+								<li><a><i class="fa fa-home"></i> 账号管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="userManage.html">账号管理</a></li>
+										<li><a href="userAdd.html">添加账号</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-edit"></i> 新闻管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="xinwenManage.html">新闻管理</a></li>
+										<li><a href="xinwenAdd.html">添加新闻</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-desktop"></i> 场地信息管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="changdiManage.html">场地信息管理</a></li>
+										<li><a href="changdiAdd.html">添加场地</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-table"></i> 预定信息管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="dingdanManage.html">预定信息管理</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-bar-chart-o"></i> 用户信息管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="userinfoManage.html">用户信息管理</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-clone"></i> 充值管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="payRecord.html">充值记录管理</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-clone"></i> 评价管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="pingjiaManage.html">评价管理</a></li>
+									</ul></li>
+							</ul>
+						</div>
+					</div>
+					<!-- /sidebar menu -->
+
+				</div>
+			</div>
+
+			<div class="right_col" role="main">
+				<div class="">
+					<div class="page-title">
+						<div class="title_left">
+							<h3>
+								<small>账号管理</small>
+							</h3>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+					<!-- 表格 -->
+					<div class="container-fluid">
+						<div class="row-fluid">
+							<div class="span12">
+								<table class="table">
+									<thead id="thread">
+									</thead>
+									<tbody id="tbody">
+									</tbody>
+								</table>
+								<div id="example" style="text-align: right">
+									<ul id="pageLimit"></ul>
+								</div>
+								<span
+									style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+									<span style="white-space: normal;"> </span>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /page content -->
+			<!-- footer content -->
+			<footer>
+				<div class="pull-right">
+					Gentelella - Bootstrap Admin Template by Colorlib. More Templates <a
+						href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a>
+					- Collect from <a href="http://www.cssmoban.com/" title="网页模板"
+						target="_blank">网页模板</a>
+				</div>
+				<div class="clearfix"></div>
+			</footer>
+			<!-- /footer content -->
+		</div>
+	</div>
+
+	<!-- FastClick -->
+	<script src="vendors/fastclick/lib/fastclick.js"></script>
+	<!-- NProgress -->
+	<script src="vendors/nprogress/nprogress.js"></script>
+	<!-- validator -->
+	<script src="vendors/validator/validator.js"></script>
+
+	<!-- Custom Theme Scripts -->
+	<script src="build/js/custom.min.js"></script>
+
+</body>
+</html>

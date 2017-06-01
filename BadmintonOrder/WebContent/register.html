@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Contact Me</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+  
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+  	<link rel="stylesheet" href="css/style.css" id="theme-styles">
+
+    <!--[if lt IE 9]>      
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/modernizr.js"></script>
+</head>
+<body>
+<script type="text/javascript">    
+    function register(){
+    	var password = $("#password").val();
+    	var password2 = $("#password2").val();
+    	if(password != password2){
+    		alert("两次密码不一致");
+    		return;
+    	}
+    	var telphone = $("#telphone").val();
+    	var re= /^1\d{10}$/;
+    	if(!re.test(telphone)){
+    		alert("联系方式格式错误");
+    		return;
+    	}
+    	$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "user/add",
+			data : {
+				"username" : $("#username").val(),
+				"realname" : $("#realname").val(),
+				"password" : $("#password").val(),
+				"telphone" : $("#telphone").val(),
+				"money" : 0
+			},
+			success : function(data) {
+				if(data >= 1){
+					alert("注册成功!");
+					location.href = "userlogin.html";
+				}
+			}
+		});
+    }
+    </script>
+    <header>
+        <div class="widewrapper masthead">
+            <div class="container">
+                <a href="index.html" id="logo">
+                    <img src="img/logo.png" alt="clean Blog">
+                </a>
+
+                <div id="mobile-nav-toggle" class="pull-right">
+                    <a href="#" data-toggle="collapse" data-target=".clean-nav .navbar-collapse">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </div>
+
+                <nav class="pull-right clean-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                          <li>
+                                <a href="index.html">首页</a>
+                            </li>
+                            <li>
+                                <a href="changdi.html">场地列表</a>
+                            </li>
+                            <li>
+                                <a href="chongzhi.html">账户充值</a>
+                            </li>
+                            <li>
+                                <a href="register.html">注册</a>
+                            </li>                 
+                        </ul>
+                    </div>
+                </nav>        
+
+            </div>
+        </div>
+
+        <div class="widewrapper subheader">
+            <div class="container">
+            </div>
+        </div>
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 clean-superblock" id="contact">
+                    <h2>用户注册</h2>
+                    <form action="#" method="get" accept-charset="utf-8" class="contact-form">
+                    <input type="text" name="username" id="username" placeholder = "用户名" class="form-control input-lg">
+                    <input type="text" name="telphone" id="telphone" placeholder = "联系方式" class="form-control input-lg">
+                    <input type="text" name="realname" id="realname" placeholder = "真实姓名" class="form-control input-lg">
+                    <input type="password" name="password" id="password" placeholder = "密码" class="form-control input-lg">
+                    <input type="password" name="password2" id="password2" placeholder = "确认密码" class="form-control input-lg">
+                    <div class="buttons clearfix">
+                        <button type="button" class="btn btn-xlarge btn-clean-one" onclick = "register()">充值</button>
+                    </div> 
+                    </form>                  
+                </div>
+            </div>        
+        </div>
+    </div>
+</body>
+</html>

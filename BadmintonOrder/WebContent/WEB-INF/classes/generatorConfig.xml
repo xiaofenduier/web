@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+	<classPathEntry location="C:\Users\lj\Desktop\2\mysql-connector-java-5.1.18.jar" />
+	<context id="DB2Tables" targetRuntime="MyBatis3">
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://localhost:3306/badminton?useUnicode=true" 
+			userId="root" password="123">
+		</jdbcConnection>
+
+		<javaModelGenerator targetPackage="com.web.badminton.model"
+			targetProject="BadmintonOrder/src">
+		</javaModelGenerator>
+
+		<sqlMapGenerator targetPackage="mapping"
+			targetProject="BadmintonOrder/src">
+		</sqlMapGenerator>
+
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="com.web.badminton.dao" targetProject="BadmintonOrder/src">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+	<!-- 	<table schema="DB2ADMIN" tableName="changdi" domainObjectName="Changdi"></table>
+		<table schema="DB2ADMIN" tableName="dingdan" domainObjectName="Dingdan"></table>
+		<table schema="DB2ADMIN" tableName="pingjia" domainObjectName="Pingjia"></table> -->
+		<!-- <table schema="DB2ADMIN" tableName="root" domainObjectName="Root"></table> -->
+		<table schema="DB2ADMIN" tableName="xinwen" domainObjectName="Xinwen"></table>
+		<!-- <table schema="DB2ADMIN" tableName="xinwen" domainObjectName="Xinwen"></table> -->
+	</context>
+</generatorConfiguration>

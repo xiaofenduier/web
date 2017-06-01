@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- Meta, title, CSS, favicons, etc. -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>羽毛球馆管理系统</title>
+
+<!-- Bootstrap -->
+<link href="vendors/bootstrap/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<!-- Font Awesome -->
+<link href="vendors/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet">
+<!-- NProgress -->
+<link href="vendors/nprogress/nprogress.css" rel="stylesheet">
+
+<!-- Custom Theme Style -->
+<link href="build/css/custom.min.css" rel="stylesheet">
+
+</head>
+<body class="nav-md">
+	<div class="container body">
+		<div class="main_container">
+			<div class="col-md-3 left_col">
+				<div class="left_col scroll-view">
+					<div class="navbar nav_title" style="border: 0;">
+						<a href="index.html" class="site_title"><i class="fa fa-paw"></i>
+							<span>羽毛球馆管理系统</span></a>
+					</div>
+
+					<div class="clearfix"></div>
+
+					<!-- menu profile quick info -->
+					<div class="profile clearfix">
+						<div class="profile_pic">
+							<img src="images/img.jpg" alt="..."
+								class="img-circle profile_img">
+						</div>
+						<div class="profile_info">
+							<span>欢迎,</span>
+							<h2 id="loginname"></h2>
+						</div>
+					</div>
+					<!-- /menu profile quick info -->
+
+					<br />
+
+					<!-- sidebar menu -->
+					<div id="sidebar-menu"
+						class="main_menu_side hidden-print main_menu">
+						<div class="menu_section">
+							<h3>General</h3>
+							<ul class="nav side-menu">
+								<li><a><i class="fa fa-home"></i> 账号管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="userManage.html">账号管理</a></li>
+										<li><a href="userAdd.html">添加账号</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-edit"></i> 新闻管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="xinwenManage.html">新闻管理</a></li>
+										<li><a href="xinwenAdd.html">添加新闻</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-desktop"></i> 场地信息管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="changdiManage.html">场地信息管理</a></li>
+										<li><a href="changdiAdd.html">添加场地</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-table"></i> 预定信息管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="dingdanManage.html">预定信息管理</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-bar-chart-o"></i> 用户信息管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="userinfoManage.html">用户信息管理</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-clone"></i> 充值管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="payRecord.html">充值记录管理</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-clone"></i> 评价管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="pingjiaManage.html">评价管理</a></li>
+									</ul></li>
+							</ul>
+						</div>
+					</div>
+					<!-- /sidebar menu -->
+
+				</div>
+			</div>
+
+			<!-- page content -->
+			<div class="right_col" role="main">
+				<div class="">
+					<div class="page-title">
+						<div class="title_left">
+							<h3>添加场地</h3>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+
+					<div class="row">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="x_panel">
+								<div class="x_content">
+									<!-- Smart Wizard -->
+									<p>This is a basic form wizard example that inherits the
+										colors from the selected scheme.</p>
+									<div id="wizard" class="form_wizard wizard_horizontal">
+										<ul class="wizard_steps">
+											<li><a href="#step-1"> <span class="step_no">1</span>
+													<span class="step_descr"> 第一步<br /> <small>填写基本信息</small>
+												</span>
+											</a></li>
+											<li><a href="#step-2"> <span class="step_no">2</span>
+													<span class="step_descr"> 第二步<br /> <small>上传图片</small>
+												</span>
+											</a></li>
+										</ul>
+										<div id="step-1">
+											<form class="form-horizontal form-label-left">
+
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="first-name">场地名称<span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="text" id="name" required="required"
+															class="form-control col-md-7 col-xs-12">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="last-name">场地地址 <span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="text" id="address" name="address"
+															required="required"
+															class="form-control col-md-7 col-xs-12">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="last-name">联系方式 <span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="text" id="telphone" name="telphone"
+															required="required"
+															class="form-control col-md-7 col-xs-12" onblur = "checkphone()">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="last-name">场地介绍 <span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="text" id="introduce" name="introduce"
+															required="required"
+															class="form-control col-md-7 col-xs-12">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="last-name">场地路线 <span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="text" id="route" name="route"
+															required="required"
+															class="form-control col-md-7 col-xs-12">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="last-name">场地管理员 <span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="text" id="admin" name="admin"
+															required="required"
+															class="form-control col-md-7 col-xs-12">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-3 col-sm-3 col-xs-12"
+														for="last-name">场地价格 <span class="required">*</span>
+													</label>
+													<div class="col-md-6 col-sm-6 col-xs-12">
+														<input type="number" id="price" name="price" required="required" data-validate-minmax="10,100" class="form-control col-md-7 col-xs-12">
+													</div>
+												</div>
+											</form>
+
+										</div>
+										<div id="step-2">
+											<div class="form-group" style="height: 400px">
+												<h2 class="StepTitle">上传图片</h2>
+												<input id="file" type="file" style="display: inline">
+											</div>
+											<div class="form-group">
+												<button id="add" type="button" class="btn btn-success"
+													onclick="add()">提交</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /page content -->
+
+			<!-- footer content -->
+			<footer>
+				<div class="pull-right">
+					Gentelella - Bootstrap Admin Template by Colorlib. More Templates <a
+						href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a>
+					- Collect from <a href="http://www.cssmoban.com/" title="网页模板"
+						target="_blank">网页模板</a>
+				</div>
+				<div class="clearfix"></div>
+			</footer>
+			<!-- /footer content -->
+		</div>
+	</div>
+	<!-- jQuery -->
+<script src="vendors/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- FastClick -->
+<script src="vendors/fastclick/lib/fastclick.js"></script>
+<!-- NProgress -->
+<script src="vendors/nprogress/nprogress.js"></script>
+<!-- jQuery Smart Wizard -->
+<script src="vendors/jQuery-Smart-Wizard/js/jquery.smartWizard.js"></script>
+<!-- Custom Theme Scripts -->
+<script src="build/js/custom.min.js"></script>
+<link href="vendors/bootstrap/dist/css/fileinput.min.css">
+<script src="vendors/bootstrap/dist/js/sortable.min.js"></script>
+<script src="vendors/bootstrap/dist/js/fileinput.min.js"></script>
+<script src="vendors/bootstrap/dist/js/fileinput_locale_zh.js"></script>
+<script>
+$(document).ready(function() {
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "user/islogin",
+		success : function(data) {
+			if(data == -1){
+				alert("请先登录!");
+				location.href = "userLogin.html";
+			}else{
+				$("#loginname").html(data.username);
+			}
+		}
+	});
+	
+	//初始化控件initFileInput(id,uploadurl)控件id，与上传路径  
+	initFileInput("file", "changdi/upload");
+});
+
+function checkphone(){
+	var telphone = $("#telphone").val();
+	var re= /^1\d{10}$/;
+	if(!re.test(telphone)){
+		alert("联系方式格式错误")
+	}
+}
+
+function initFileInput(ctrlName, uploadUrl) {  
+    var control = $('#' + ctrlName);  
+    control.fileinput({  
+        resizeImage : true,  
+        maxImageWidth : 200,  
+        maxImageHeight : 200,  
+        resizePreference : 'width',  
+        language : 'zh', //设置语言  
+        uploadUrl : uploadUrl,  
+        uploadAsync : true,  
+        allowedFileExtensions : [ 'jpg', 'png', 'gif' ],//接收的文件后缀  
+        showUpload : true, //是否显示上传按钮  
+        showCaption : true,//是否显示标题  
+        browseClass : "btn btn-primary", //按钮样式  
+        previewFileIcon : "<i class='glyphicon glyphicon-king'></i>",  
+        maxFileCount : 3,  
+        msgFilesTooMany : "选择图片超过了最大数量",  
+        maxFileSize : 20000,  
+    });  
+}
+
+function add(){
+	var name = $("#name").val();
+	var address = $("#address").val();
+	var telphone = $("#telphone").val();
+	var introduce = $("#introduce").val();
+	var route = $("#route").val();
+	var price = $("#price").val();
+	var admin = $("#admin").val();
+	$.ajax({
+		type : 'POST',
+		dataType : "json",
+		url : "changdi/add",
+		data : {
+			"name" :　name,
+			"address" : address,
+			"telphone" :　telphone,
+			"introduce" : introduce,
+			"route" :　route,
+			"price" : price,
+			"admin" : admin
+		},
+		success : function(data) {
+			if(data >= 1){
+				alert("增加成功");
+				location.href = "changdiManage.html";
+			}
+		}
+	});
+}
+</script>
+</body>
+</html>

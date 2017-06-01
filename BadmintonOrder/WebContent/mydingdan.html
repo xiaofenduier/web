@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+   
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css" id="theme-styles">
+
+    <!--[if lt IE 9]>      
+        <script src="js/respond.js"></script>
+    <![endif]-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/modernizr.js"></script>
+    <script src="vendors/bootstrap/dist/js/bootstrap-paginator.min.js"></script>
+    <script type="text/javascript">
+    var userid;
+    function quit(){
+    	$.ajax({
+    		type : "POST",
+    		dataType : "json",
+    		url : "user/quit",
+    		data : {
+    			"id" : userid
+    		},
+    		success : function(data) {
+    			if(data > 0){
+    				alert("注销成功");
+    				$("#modal-container-170348").modal("toggle");
+    				location.reload();
+    			}
+    		}
+    	});
+    }
+    function quit(){
+    	$.ajax({
+    		type : "POST",
+    		dataType : "json",
+    		url : "user/quit",
+    		data : {
+    			"id" : userid
+    		},
+    		success : function(data) {
+    			if(data > 0){
+    				alert("注销成功");
+    				$("#modal-container-170348").modal("toggle");
+    				location.reload();
+    			}
+    		}
+    	});
+    }
+    $(document).ready(function() {
+    	$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "user/islogin",
+			success : function(data) {
+				if (data.data == null) {
+					alert("请先登录!");
+					location.href = "userLogin.html";
+					return;
+				}else{
+					$("#msg").html("欢迎"+data.data.username);
+					$("#reg").hide();
+					$("#log").hide();
+					userid = data.data.id;
+					$("#myyue").val(data.data.money);
+					initTable();
+				}
+			}
+		});
+    });
+    
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+                + " " + date.getHours() + seperator2 + date.getMinutes();
+        return currentdate;
+    }
+    
+    function quxiao(id){
+    	$("#modal-container-770346").modal();
+    	$("#remove").click(function() {
+			$.ajax({
+				type : 'post',
+				url : "dingdan/delete",
+				cache : false,
+				dataType : 'json',
+				data : {
+					"id" : id
+				},
+				success : function(data) {
+					alert("取消成功,付款以转至账户余额！");
+					$("#modal-container-770346").modal("toggle");
+					location.reload();
+				}
+			});
+    	});
+    }
+    
+    function initTable(){
+    	$.ajax({
+    		type : 'POST',
+    		dataType : "json",
+    		url : "dingdan/selectwithpage",
+    		data : {
+    			"currentPage" : 1,
+    			"pageSize" : 10,
+    			"userid" :　userid
+    		},
+    		success : function(data) {
+    			var result = data.data;
+    			var thread = "<tr><th>编号</th><th>场地名</th><th>用户名</th><th>预约时间</th><th>预约开始时间</th><th>预约结束时间</th><th>场地占用时间</th><th>操作</th></tr>";
+    			var tbody = "";
+    			var currentdate = getNowFormatDate();
+    			alert(currentdate);
+    			$.each(result, function(i, resultObj) {
+    				$.ajax({
+    					type : 'POST',
+    					dataType : "json",
+    					url : "changdi/selectbyid",
+    					async: false,
+    					data : {
+    						"id" : resultObj.changdiid
+    					},
+    					success : function(changdidata) {
+    						$.ajax({
+    							type : 'POST',
+    							dataType : "json",
+    							url : "user/selectbyid",
+    							async: false,
+    							data : {
+    								"id" : resultObj.userid
+    							},
+    							success : function(userdata) {
+    								if(currentdate < resultObj.endtime){
+    									tbody += "<tr class = 'success'><td>"+resultObj.id+"</td><td>"+changdidata.name+"</td><td>"+userdata.username+"</td><td>"+resultObj.playtime+"</td><td>"+resultObj.starttime+"</td><td>"+resultObj.endtime+"</td><td>"+resultObj.time+"小时</td><td><button role='button' class='btn' data-toggle='modal' onclick=quxiao("+ resultObj.id+ ")>取消预订</button></td></tr>";
+    								}else{
+    									tbody += "<tr class = 'success'><td>"+resultObj.id+"</td><td>"+changdidata.name+"</td><td>"+userdata.username+"</td><td>"+resultObj.playtime+"</td><td>"+resultObj.starttime+"</td><td>"+resultObj.endtime+"</td><td>"+resultObj.time+"小时</td><td>已完成</td></tr>";
+    								}
+    							}
+    						});
+    					}
+    				});
+    			});
+    			$("#thread").html(thread);
+    			$("#tbody").html(tbody);
+    			
+    			var pageSize = data.pageSize;
+    			var pageCount = data.pageCount;
+    			var currentPage = data.currentPage;
+    			var options = {
+    				currentPage : currentPage,
+    				totalPages : pageCount,
+    				size : "normal",
+    				bootstrapMajorVersion : 3,
+    				alignment : "right",
+    				numberOfPages : pageSize,
+    				itemTexts : function(type, page, current) {
+    					switch (type) {
+    					case "first":
+    						return "首页";
+    					case "prev":
+    						return "上一页";
+    					case "next":
+    						return "下一页";
+    					case "last":
+    						return "末页";
+    					case "page":
+    						return page;
+    					}
+    				},
+    				//点击事件，用于通过Ajax来刷新整个list列表
+    				onPageClicked : function(event, originalEvent,type, page) {
+    					$.ajax({
+    						type : 'POST',
+    						dataType : "json",
+    						url : "dingdan/selectwithpage",
+    						data : {
+    							"currentPage" : page,
+    							"pageSize" : pageSize
+    						},
+    						success : function(data) {
+    							var resultwithpage = data.data;
+    							var tbodywithpage = "";
+    							$.each(resultwithpage, function(i, resultwithpageObj) {
+    								$.ajax({
+    									type : 'POST',
+    									dataType : "json",
+    									url : "changdi/select",
+    									async: false,
+    									data : {
+    										"id" : resultObj.changdiid
+    									},
+    									success : function(changdidata) {
+    										$.ajax({
+    											type : 'POST',
+    											dataType : "json",
+    											url : "user/select",
+    											async: false,
+    											data : {
+    												"id" : resultObj.userid
+    											},
+    											success : function(userdata) {
+    												if(currentdate < resultwithpageObj.endtime){
+    													tbodywithpage += "<tr class = 'success'><td>"+resultwithpageObj.id+"</td><td>"+changdidata.name+"</td><td>"+userdata.username+"</td><td>"+resultwithpageObj.playtime+"</td><td>"+resultwithpageObj.starttime+"</td><td>"+resultwithpageObj.endtime+"</td><td>"+resultwithpageObj.time+"小时</td><td><button role='button' class='btn' data-toggle='modal' onclick=quxiao("+ resultObj.id+ ")>取消预订</button></td></tr>";
+    												}else{
+    													tbodywithpage += "<tr class = 'success'><td>"+resultwithpageObj.id+"</td><td>"+changdidata.name+"</td><td>"+userdata.username+"</td><td>"+resultwithpageObj.playtime+"</td><td>"+resultwithpageObj.starttime+"</td><td>"+resultwithpageObj.endtime+"</td><td>"+resultwithpageObj.time+"小时</td><td>已完成</td></tr>";
+    												}
+    											}
+    										});
+    									}
+    								});
+    							});
+    							$("#tbody").html(tbodywithpage);
+    						}
+    					});
+    				}
+    			};
+    			$('#pageLimit').bootstrapPaginator(options);
+    		}
+    	});
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="widewrapper subheader">
+            <div class="container">
+                <nav class="pull-right clean-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="index.html">首页</a>
+                            </li>
+                            <li>
+                                <a href="changdi.html">场地列表</a>
+                            </li>
+                            <li>
+                                <a href="chongzhi.html">账户充值</a>
+                            </li>
+                            <li>
+                                <a href="mydingdan.html">我的预定</a>
+                            </li>
+                            <li>
+                                <a href="userinfo.html">修改个人信息</a>
+                            </li>
+                            <li id = "reg">
+                                <a href="register.html">注册</a>
+                            </li>     
+                            <li id = "log">
+                                <a href="userLogin.html">登录</a>
+                            </li>
+                            <li id = "quit">
+                                <a href="#modal-container-170348" data-toggle="modal">注销</a>
+                            </li>
+                            <li id = "rlogin">
+                                <a href="rootLogin.html">后台登录</a>
+                            </li>
+                            <li id = "chakanyue">
+                                <a href="#modal-container-770347" data-toggle="modal">查看余额</a>
+                            </li> 
+                        </ul>
+                    </div>
+                </nav>
+                <p id = "msg" style = "margin-left:-50px;margin-top:20px"></p>
+            </div>
+        </div>
+    </header>
+
+	<!-- 表格 -->
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span12">
+				<table class="table">
+					<thead id="thread">
+					</thead>
+					<tbody id="tbody">
+					</tbody>
+				</table>
+				<div id="example" style="text-align: right">
+					<ul id="pageLimit"></ul>
+				</div>
+				<span style="font-family: 'sans serif, tahoma, verdana, helvetica';">
+					<span style="white-space: normal;"> </span>
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <h3> <i class="fa fa-user"></i>地址</h3>
+                       <p>啪啪啪啪啪路啪啪啪啪街啪啪啪啪啪啪号</p>
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="fa fa-envelope"></i>联系方式</h3>
+                        <p>18301057019</p>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- 取消订单 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-770346" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">取消订单！</h4>
+							</div>
+							<div class="modal-body">
+								<p id="delete">确认取消？</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="remove">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 查看余额 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-770347" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">我的余额</h4>
+							</div>
+							<div class="modal-body">
+								<label for="exampleInputEmail1">我的余额</label>
+								<input type="text" name="myyue" id="myyue" readonly class="form-control input-lg">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="remove">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 注销 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-170348" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">注销</h4>
+							</div>
+							<div class="modal-body">
+								<p id="delete">确认注销？</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="quit" onclick="quit()">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

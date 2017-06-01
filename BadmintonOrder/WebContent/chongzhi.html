@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Contact Me</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+  
+
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+  	<link rel="stylesheet" href="css/style.css" id="theme-styles">
+
+    <!--[if lt IE 9]>      
+        <script src="js/vendor/google/html5-3.6-respond-1.1.0.min.js"></script>
+    <![endif]-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/modernizr.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+    var userid
+    $(document).ready(function() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "user/islogin",
+			success : function(data) {
+				if (data.data == null) {
+					alert("请先登录!");
+					location.href = "userLogin.html";
+					return;
+				} else {
+					userid = data.data.id;
+					$("#name").val(data.data.realname);
+					$("#phone").val(data.data.telphone);
+					$("#yue").val(data.data.money);
+					$("#reg").hide();
+					$("#log").hide();
+					$("#msg").html("欢迎登录"+data.data.username);
+					$("#myyue").val(data.data.money);
+				}
+			}
+		});
+	});
+    function quit(){
+    	$.ajax({
+    		type : "POST",
+    		dataType : "json",
+    		url : "user/quit",
+    		data : {
+    			"id" : userid
+    		},
+    		success : function(data) {
+    			if(data > 0){
+    				alert("注销成功");
+    				$("#modal-container-170348").modal("toggle");
+    				location.reload();
+    			}
+    		}
+    	});
+    }
+    function chongzhi(){
+    	$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "parRecord/add",
+			data : {
+				"userid" : userid,
+				"money" : $("#money").val()
+			},
+			success : function(data) {
+				if(data >= 1){
+					alert("充值成功!");
+					$.ajax({
+						type : "POST",
+						dataType : "json",
+						async: false,
+						data : {
+							"id" : userid
+						},
+						url : "user/selectbyid",
+						success : function(data) {
+							$("#yue").val(data.money);
+						}
+					});
+				}
+			}
+		});
+    }
+    function quit(){
+    	$.ajax({
+    		type : "POST",
+    		dataType : "json",
+    		url : "user/quit",
+    		data : {
+    			"id" : userid
+    		},
+    		success : function(data) {
+    			if(data > 0){
+    				alert("注销成功");
+    				$("#modal-container-170348").modal("toggle");
+    				location.reload();
+    			}
+    		}
+    	});
+    }
+    </script>
+    <header>
+        <div class="widewrapper subheader">
+            <div class="container">
+                <nav class="pull-right clean-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="index.html">首页</a>
+                            </li>
+                            <li>
+                                <a href="changdi.html">场地列表</a>
+                            </li>
+                            <li>
+                                <a href="chongzhi.html">账户充值</a>
+                            </li>
+                            <li>
+                                <a href="mydingdan.html">我的预定</a>
+                            </li>
+                            <li>
+                                <a href="userinfo.html">修改个人信息</a>
+                            </li>
+                            <li id = "reg">
+                                <a href="register.html">注册</a>
+                            </li> 
+                            <li id = "log">
+                                <a href="userLogin.html">登录</a>
+                            </li>
+                            <li id = "quit">
+                                <a href="#modal-container-170348" data-toggle="modal">注销</a>
+                            </li>
+                            <li id = "rlogin">
+                                <a href="rootLogin.html">后台登录</a>
+                            </li>
+                            <li id = "chakanyue">
+                                <a href="#modal-container-770346" data-toggle="modal">查看余额</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <p id = "msg" style = "margin-left:-50px;margin-top:20px"></p>
+            </div>
+        </div>
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 clean-superblock" id="contact">
+                    <h2>Contact</h2>
+                    
+                    <form action="#" method="get" accept-charset="utf-8" class="contact-form">
+                        <input type="text" name="name" id="name" readonly class="form-control input-lg">
+                        <input type="text" name="phone" id="phone" readonly class="form-control input-lg">
+                        <input type="text" name="yue" id="yue" readonly class="form-control input-lg">
+                        <input type="text" name="money" id="money" placeholder = "充值金额" class="form-control input-lg">
+                        <div class="buttons clearfix">
+                            <button type="button" class="btn btn-xlarge btn-clean-one" onclick = "chongzhi()">充值</button>
+                        </div>                    
+                    </form>
+                </div>
+            </div>        
+        </div>
+    </div>
+
+   <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <h3> <i class="fa fa-user"></i>地址</h3>
+                       <p>啪啪啪啪啪路啪啪啪啪街啪啪啪啪啪啪号</p>
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="fa fa-envelope"></i>联系方式</h3>
+                        <p>18301057019</p>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- 查看余额 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-770346" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">我的余额</h4>
+							</div>
+							<div class="modal-body">
+								<label for="exampleInputEmail1">我的余额</label>
+								<input type="text" name="myyue" id="myyue" readonly class="form-control input-lg">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="remove">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 注销 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-170348" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">注销</h4>
+							</div>
+							<div class="modal-body">
+								<p id="delete">确认注销？</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="quit" onclick="quit()">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

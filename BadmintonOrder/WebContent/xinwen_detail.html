@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link href="vendors/bootstrap-datetimepicker/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="vendors/bootstrap-datetimepicker/bootstrap/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+   
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css" id="theme-styles">
+    <!--[if lt IE 9]>      
+        <script src="js/respond.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="vendors/bootstrap-datetimepicker/jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+	<script type="text/javascript" src="vendors/bootstrap-datetimepicker/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="vendors/bootstrap-datetimepicker/bootstrap/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+	<script type="text/javascript" src="vendors/bootstrap-datetimepicker/bootstrap/js/locales/bootstrap-datetimepicker.fr.js" charset="UTF-8"></script>
+    <script src="js/modernizr.js"></script>
+    <script src="vendors/bootstrap/dist/js/bootstrap-paginator.min.js"></script>
+    <script type="text/javascript">
+    function quit(){
+    	$.ajax({
+    		type : "POST",
+    		dataType : "json",
+    		url : "user/quit",
+    		data : {
+    			"id" : userid
+    		},
+    		success : function(data) {
+    			if(data > 0){
+    				alert("注销成功");
+    				$("#modal-container-170348").modal("toggle");
+    				location.reload();
+    			}
+    		}
+    	});
+    }
+    $(document).ready(function() {
+    	var url = location.href; 
+    	var id = url.split("=")[1];
+    	$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "user/islogin",
+			success : function(data) {
+				if (data.data == null) {
+					alert("请先登录!");
+					location.href = "userLogin.html";
+					return;
+				} else {
+					userid = data.data.id;
+					$("#reg").hide();
+					$("#log").hide();
+					$("#msg").html("欢迎"+data.data.username);
+					$("#myyue").val(data.data.money);
+				}
+			}
+		});
+    	$.ajax({
+			type : 'POST',
+			dataType : "json",
+			url : "xinwen/selectbyid",
+			data : {
+				"id" : id
+			},
+			success : function(data) {
+				var content = '<div class="row"><div class="col-md-6 col-sm-6"><article class=" blog-teaser"><header><img src="'+data.pic+'" alt=""><hr></header></article></div><div class="col-md-4 col-sm-4" style="margin-top:20px"><h3>标题：'+data.title+'</h3><br/><h3>内容：'+data.content+'</h3><br/></div></div>';
+				$("#table").html(content);
+			}
+    	});
+    	
+    });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="widewrapper subheader">
+            <div class="container">
+                <nav class="pull-right clean-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="index.html">首页</a>
+                            </li>
+                            <li>
+                                <a href="changdi.html">场地列表</a>
+                            </li>
+                            <li>
+                                <a href="chongzhi.html">账户充值</a>
+                            </li>
+                            <li>
+                                <a href="mydingdan.html">我的预定</a>
+                            </li>
+                            <li>
+                                <a href="userinfo.html">修改个人信息</a>
+                            </li>
+                            <li id = "reg">
+                                <a href="register.html">注册</a>
+                            </li> 
+                            <li id = "log">
+                                <a href="userLogin.html">登录</a>
+                            </li>
+                            <li id = "quit">
+                                <a href="#modal-container-170348" data-toggle="modal">注销</a>
+                            </li>
+                            <li id = "rlogin">
+                                <a href="rootLogin.html">后台登录</a>
+                            </li>
+                            <li id = "chakanyue">
+                                <a href="#modal-container-770346" data-toggle="modal">查看余额</a>
+                            </li> 
+                        </ul>
+                    </div>
+                </nav>
+                <p id = "msg" style = "margin-left:-50px;margin-top:20px"></p>
+            </div>
+        </div>
+    </header>
+
+    <div class="widewrapper main">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 blog-main" id = "table">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="widewrapper footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 footer-widget">
+                       <h3> <i class="fa fa-user"></i>地址</h3>
+                       <p>啪啪啪啪啪路啪啪啪啪街啪啪啪啪啪啪号</p>
+                    </div>
+
+                    <div class="col-md-4 footer-widget">
+                        <h3> <i class="fa fa-envelope"></i>联系方式</h3>
+                        <p>18301057019</p>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </footer>
+	<div class="modal fade" id="modal-container-445199" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">场地预定</h4>
+				</div>
+				<div class="modal-body">
+					<input type="text" name="changdiname" id="changdiname" readonly class="form-control input-lg">
+					<br/>
+					开始时间：<input type="text" size="16" id="datetimeStart" readonly class="form_datetime">
+					--
+					结束时间：<input type="text" size="16" id="datetimeEnd" readonly class="form_datetime">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" onclick = "order()">确认预订</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<!-- 查看余额 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-770346" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">我的余额</h4>
+							</div>
+							<div class="modal-body">
+								<label for="exampleInputEmail1">我的余额</label>
+								<input type="text" name="myyue" id="myyue" readonly class="form-control input-lg">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="remove">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 注销 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-170348" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">注销</h4>
+							</div>
+							<div class="modal-body">
+								<p id="delete">确认注销？</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="quit" onclick="quit()">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

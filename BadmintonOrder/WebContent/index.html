@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Bootstrap styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+   
+    <!-- Font-Awesome -->
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+    <!-- Google Webfonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600|PT+Serif:400,400italic' rel='stylesheet' type='text/css'>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css" id="theme-styles">
+
+    <!--[if lt IE 9]>      
+        <script src="js/respond.js"></script>
+    <![endif]-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/modernizr.js"></script>
+</head>
+<script type="text/javascript">
+var userid;
+$(document).ready(function() {
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "user/islogin",
+		success : function(data) {
+			if (data.data == null) {
+				$("#logmsg").hide();
+				$("#quit").hide();
+				$("#chakanyue").hide();
+			} else {
+				userid = data.data.id;
+				$("#msg").html("欢迎"+data.data.username);
+				$("#log").hide();
+				$("#reg").hide();
+				$("#myyue").val(data.data.money);
+			}
+		}
+	});
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "xinwen/selectwithpage",
+		data : {
+			"currentPage" : 1,
+			"pageSize" : 6
+		},
+		success : function(data) {
+			var result = data.data;
+			var row1 = '<div class="row"><div class="col-md-6 col-sm-6"><article class=" blog-teaser"><header><img src="'+ result[0].pic +'" alt=""><h3><a href="xinwen_detail.html?id='+result[0].id+'">'+result[0].title+'</a></h3><hr></header></article></div><div class="col-md-6 col-sm-6"><article class="blog-teaser"><header><img src="'+result[1].pic+'" alt=""><h3><a href="xinwen_detail.html?id='+result[1].id+'">'+result[1].title+'</a></h3><hr></header></article></div></div>';
+			var row2 = '<div class="row"><div class="col-md-6 col-sm-6"><article class=" blog-teaser"><header><img src="'+ result[2].pic +'" alt=""><h3><a href="xinwen_detail.html?id='+result[2].id+'">'+result[2].title+'</a></h3><hr></header></article></div><div class="col-md-6 col-sm-6"><article class="blog-teaser"><header><img src="'+result[3].pic+'" alt=""><h3><a href="xinwen_detail.html?id='+result[3].id+'">'+result[3].title+'</a></h3><hr></header></article></div></div>';
+			var row3 = '<div class="row"><div class="col-md-6 col-sm-6"><article class=" blog-teaser"><header><img src="'+ result[4].pic +'" alt=""><h3><a href="xinwen_detail.html?id='+result[4].id+'">'+result[4].title+'</a></h3><hr></header></article></div><div class="col-md-6 col-sm-6"><article class="blog-teaser"><header><img src="'+result[5].pic+'" alt=""><h3><a href="xinwen_detail.html?id='+result[5].id+'">'+result[5].title+'</a></h3><hr></header></article></div></div>';
+			var row = row1 + row2 + row3;
+			$("#row").html(row);
+			$("a1").attr("href","www.xxx.com"); 
+		}
+	});
+	
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "pingjia/selectwithpage",
+		data : {
+			"currentPage" : 1,
+			"pageSize" : 6
+		},
+		success : function(data) {
+			var result = data.data;
+			var list1 = '<li><a href="changdi_detail.html?id='+result[0].changdiid+'">'+result[0].pingjia+'</a></li>';
+			var list2 = '<li><a href="changdi_detail.html?id='+result[1].changdiid+'">'+result[1].pingjia+'</a></li>';
+			var list3 = '<li><a href="changdi_detail.html?id='+result[2].changdiid+'">'+result[2].pingjia+'</a></li>';
+			var list4 = '<li><a href="changdi_detail.html?id='+result[3].changdiid+'">'+result[3].pingjia+'</a></li>';
+			var list5 = '<li><a href="changdi_detail.html?id='+result[4].changdiid+'">'+result[4].pingjia+'</a></li>';
+			var list6 = '<li><a href="changdi_detail.html?id='+result[5].changdiid+'">'+result[5].pingjia+'</a></li>';
+			var list = list1 + list2 + list3 + list4 + list5 + list6;
+			$("#list").html(list);
+		}
+	});
+	
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "pingjia/selectbyscore",
+		success : function(data) {
+			var clist = "";
+			$.each(data,function(i, resultObj) {
+				$.ajax({
+					type : 'post',
+					url : "changdi/selectbyid",
+					async: false,
+					dataType : 'json',
+					data : {
+						"id" : resultObj.changdiid
+					},
+					success : function(data) {
+						clist = clist + '<li><a href="changdi_detail.html?id='+data.id+'">'+data.name+'</a></li>';
+					}
+				});
+			});
+			$("#clist").html(clist);
+		}
+	});
+})
+function quit(){
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "user/quit",
+		data : {
+			"id" : userid
+		},
+		success : function(data) {
+			if(data > 0){
+				alert("注销成功");
+				$("#modal-container-170348").modal("toggle");
+				location.reload();
+			}
+		}
+	});
+}
+</script>
+<body>
+    <header>
+    	<div class="widewrapper subheader">
+            <div class="container">
+                <nav class="pull-right clean-nav">
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav nav-pills navbar-nav">
+                            <li>
+                                <a href="index.html">首页</a>
+                            </li>
+                            <li>
+                                <a href="changdi.html">场地列表</a>
+                            </li>
+                            <li>
+                                <a href="chongzhi.html">账户充值</a>
+                            </li>
+                            <li>
+                                <a href="mydingdan.html">我的预定</a>
+                            </li>
+                            <li>
+                                <a href="userinfo.html">修改个人信息</a>
+                            </li>
+                            <li id = "reg">
+                                <a href="register.html">注册</a>
+                            </li> 
+                            <li id = "log">
+                                <a href="userLogin.html">登录</a>
+                            </li>
+                            <li id = "quit">
+                                <a href="#modal-container-170348" data-toggle="modal">注销</a>
+                            </li>
+                            <li id = "rlogin">
+                                <a href="rootLogin.html">后台登录</a>
+                            </li>
+                            <li id = "chakanyue">
+                                <a href="#modal-container-770346" data-toggle="modal">查看余额</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <p id = "msg" style = "margin-left:-50px;margin-top:20px"></p>
+            </div>
+        </div>
+
+
+	</header>
+
+	<div class="widewrapper main">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 blog-main" id="row">
+					<div class="row">
+						<div class="col-md-6 col-sm-6"></div>
+						<div class="col-md-6 col-sm-6"></div>
+					</div>
+				</div>
+				<aside class="col-md-4 blog-aside">
+					<div class="aside-widget">
+						<header>
+							<h3>最新评价</h3>
+						</header>
+						<div class="body">
+							<ul class="clean-list" id="list">
+							</ul>
+						</div>
+					</div>
+
+					<div class="aside-widget">
+						<header>
+							<h3>优秀场地</h3>
+						</header>
+						<div class="body">
+							<ul class="clean-list" id="clist">
+							</ul>
+						</div>
+					</div>
+				</aside>
+			</div>
+		</div>
+	</div>
+
+	<footer>
+		<div class="widewrapper footer">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4 footer-widget">
+						<h3>
+							<i class="fa fa-user"></i>地址
+						</h3>
+						<p>啪啪啪啪啪路啪啪啪啪街啪啪啪啪啪啪号</p>
+					</div>
+
+					<div class="col-md-4 footer-widget">
+						<h3>
+							<i class="fa fa-envelope"></i>联系方式
+						</h3>
+						<p>18301057019</p>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</footer>
+	<!-- 查看余额 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-770346" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">我的余额</h4>
+							</div>
+							<div class="modal-body">
+								<label for="exampleInputEmail1">我的余额</label>
+								<input type="text" name="myyue" id="myyue" readonly class="form-control input-lg">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="remove">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 注销 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-170348" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">注销</h4>
+							</div>
+							<div class="modal-body">
+								<p id="delete">确认注销？</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="quit" onclick="quit()">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
