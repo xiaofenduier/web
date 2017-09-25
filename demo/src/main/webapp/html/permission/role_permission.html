@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- Meta, title, CSS, favicons, etc. -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>DataTables | Gentelella</title>
+
+<!-- Bootstrap -->
+<link href="../../css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="../../css/font-awesome.min.css" rel="stylesheet">
+<!-- NProgress -->
+<link href="../../css/nprogress.css" rel="stylesheet">
+<!-- iCheck -->
+<link href="../../css/green.css" rel="stylesheet">
+<!-- Datatables -->
+<link href="../../css/dataTables.bootstrap.min.css" rel="stylesheet">
+<link href="../../css/buttons.bootstrap.min.css" rel="stylesheet">
+<link href="../../css/fixedHeader.bootstrap.min.css" rel="stylesheet">
+<link href="../../css/responsive.bootstrap.min.css" rel="stylesheet">
+<link href="../../css/scroller.bootstrap.min.css" rel="stylesheet">
+
+<!-- Custom Theme Style -->
+<link href="../../css/custom.min.css" rel="stylesheet">
+<link href="../../css/bootstrap-table.css" rel="stylesheet">
+<link href="../../css/bootstrap-editable.css" rel="stylesheet">
+<link href="../../css/bootstrap-select.min.css" rel="stylesheet">
+
+<!-- jQuery -->
+<script src="../../js/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="../../js/bootstrap.min.js"></script>
+<script src="../../js/bootstrap-table.js"></script>
+<script src="../../js/bootstrap-table-zh-CN.js"></script>
+<script src="../../js/bootstrap-editable.js"></script>
+<script src="../../js/bootstrap-table-editable.js"></script>
+<script src="../../js/bootstrap-select.min.js"></script>
+<script src="../../js/defaults-zh_CN.min.js"></script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		//初始化Table
+		initTable();
+	});
+	//初始化Table
+	function initTable() {
+		$('#rolepermissiontable').bootstrapTable({
+			url : '../../rolePermission/getAllRolePermission', //请求后台的URL（*）
+			method : 'post', //请求方式（*）
+			toolbar : '#toolbar', //工具按钮用哪个容器
+			striped : true, //是否显示行间隔色
+			cache : false, //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+			pagination : true, //是否显示分页（*）
+			sortable : true, //是否启用排序
+			sortOrder : "asc", //排序方式
+			search : true,
+			queryParams : queryParams,//传递参数（*）
+			sidePagination : "server", //分页方式：client客户端分页，server服务端分页（*）
+			pageNumber : 1, //初始化加载第一页，默认第一页
+			pageSize : 10, //每页的记录行数（*）
+			pageList : [ 10, 25, 50, 100 ], //可供选择的每页的行数（*）
+			showRefresh : true, //是否显示刷新按钮
+			showColumns : true, //是否显示 内容列下拉框
+			clickToSelect : true, //是否启用点击选中行
+			uniqueId : "id", //每一行的唯一标识，一般为主键列
+			cardView : false, //是否显示详细视图
+			detailView : false, //是否显示父子表
+			checkboxHeader : true,
+			maintainSelected : true, //设置为 true 在点击分页按钮或搜索按钮时，将记住checkbox的选择项
+			columns : [ {
+				checkbox : true
+			}, {
+				field : 'id',
+				title : '序号',
+				sortable : true
+			}, {
+				field : 'role',
+				title : '角色'
+			}, {
+				field : 'roleid',
+				visible : false
+			}, {
+				field : 'permissionid',
+				visible : false
+			}, {
+				field : 'permission',
+				title : '权限'
+			}, {
+				field : 'button',
+				title : '操作',
+				events: operateEvents,
+				formatter: operateFormatter
+			},]
+			
+		});
+	};
+	
+	function getpermissionSelect(){
+		var selectStr = '<div class="item form-group"><label class="control-label col-md-3 col-sm-3 col-xs-12">权限</label><div class="col-md-6 col-sm-6 col-xs-12"><select class="selectpicker" id = "picker" multiple>';
+		$.ajax({
+			type : 'POST',
+			dataType : "json",
+			async : false,
+			url : "../../permission/initPermission2Map",
+			success : function(data) {
+				var dirPage = data.dirPage;
+				var optgroupStr = '';
+				$.each(dirPage, function(i, dirPageObj) {
+					optgroupStr = optgroupStr + '<optgroup label = "'+ dirPageObj +'">';
+					var objs = data[dirPageObj];
+					var optionStr = '';
+					$.each(objs, function(i, obj) {
+						optionStr = optionStr + '<option value = "' + obj.id + '">' + obj.name + '</option>';
+					});
+					optgroupStr = optgroupStr + optionStr + '</optgroup>';
+				});
+				selectStr = selectStr + optgroupStr + '</select>';
+			}
+		});
+		return selectStr;
+	}
+	
+	window.operateEvents = {
+		'click .RoleOfedit': function (e, value, row, index) {
+			$("#modal-container-985685").modal('show');
+			var str = '<div class="item form-group"><label class="control-label col-md-3 col-sm-3 col-xs-12">角色 </label><div class="col-md-6 col-sm-6 col-xs-12"><input type="text" class="form-control" disabled="disabled" placeholder='+ row['role'] +'></div></div>';
+			var selectStr = getpermissionSelect();
+			$("#update_modal_body").html(str + selectStr + '</div></div>');
+			$("#picker").selectpicker('refresh');
+			$("#picker").selectpicker('render');
+			
+			$("#update").click(function(){
+				var select = $("#picker").val();
+				var permissionids = '';
+				for(var i = 0; i < select.length; i++){
+					if(i == 0){
+						permissionids = select[i];
+					}else{
+						permissionids = permissionids +','+select[i];
+					}
+				}
+				$.ajax({
+					type : 'POST',
+					dataType : "json",
+					url : "../../rolePermission/updateRolePermissionById",
+					data : {
+						"id" : row["id"],
+						"roleid" : row["roleid"],
+						"permissionids" : permissionids
+					},
+					success : function(data) {
+						alert("修改成功");
+						window.location.reload();
+					}
+				});
+			});
+		}
+	}
+	
+	function operateFormatter(value, row, index) {
+		return ['<input type="button" value="修改" class="RoleOfedit btn btn-primary btn-sm" data-toggle="modal" style="display:inline">',].join('');
+	}
+	
+	function queryParams(params){
+		var temp = { //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+			currentPage : params.offset, //页码
+			pageSize : params.limit, //页面大小
+			order : params.order,
+			ordername : params.sort,
+			search : params.search
+		};
+		return temp;
+	}
+	
+	function search() {
+		var permission = $("#search_permission").val();
+		var role = $("#search_role").val();
+		$('#rolepermissiontable').bootstrapTable('refresh', {
+			query : { //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+				permission : permission,
+				role : role
+			}
+		});
+	}
+	
+	function add() {
+		$("#modal-container-985684").modal();
+		/* 初始化角色 */
+		$.ajax({
+			type : 'POST',
+			dataType : "json",
+			url : "../../role/initRole",
+			success : function(data) {
+				var option = '';
+				$.each(data, function(i, dataObj) {
+					option = option + "<option value = " + dataObj.id + ">" + dataObj.role + "</option>";
+				});
+				$("#add_role").html(option);
+				roleflag = 1;
+			}
+		});
+		/* 初始化权限 */
+		var selectStr = getpermissionSelect();
+		$("#add_select").html(selectStr);
+		$("#picker").selectpicker('refresh');
+		$("#picker").selectpicker('render');
+		
+		$("#add").click(function(){
+			var select = $("#picker").val();
+			var permissionids = '';
+			for(var i = 0; i < select.length; i++){
+				if(i == 0){
+					permissionids = select[i];
+				}else{
+					permissionids = permissionids +','+select[i];
+				}
+			}
+			var roleid = $("#add_role").val();
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "../../rolePermission/addRolePermission",
+				data : {
+					"permissionids" : permissionids,
+					"roleid" : roleid
+				},
+				success : function(data) {
+					alert("新增权限成功");
+					$("#modal-container-985684").modal("toggle");
+					window.location.reload();
+				}
+			});
+		});
+	}
+	
+	function del() {
+		$("#modal-container-770346").modal();
+		var allSelections = $('#rolepermissiontable') .bootstrapTable('getAllSelections');
+		var ids = "";
+		$.each(allSelections, function(i, selection) {
+			if(i == 0){
+				ids = selection["id"];
+			}else{
+				ids = ids + "," + selection["id"];
+			}
+		});
+		$("#del").click(function(){
+			$.ajax({
+				type : 'POST',
+				dataType : "json",
+				url : "../../rolePermission/deleteRolePermissionById",
+				data : {
+					"ids" : ids
+				},
+				success : function(data) {
+					alert("删除权限成功");
+					$("#modal-container-770346").modal("toggle");
+					window.location.reload();
+				}
+			});
+		});
+	}
+	
+	function exp(){
+		$.ajax({
+			type : 'POST',
+			dataType : "json",
+			url : "../../rolePermission/exportRolePermission",
+			success : function(data) {
+				alert("导出权限成功");
+			}
+		});
+	}
+</script>
+</head>
+
+<body class="nav-md">
+	<div class="container body">
+		<div class="main_container">
+			<div class="col-md-3 left_col">
+				<div class="left_col scroll-view">
+					<div class="navbar nav_title" style="border: 0;">
+						<a href="index.html" class="site_title"><i class="fa fa-paw"></i>
+							<span>Gentelella Alela!</span></a>
+					</div>
+
+					<div class="clearfix"></div>
+
+					<!-- menu profile quick info -->
+					<div class="profile clearfix">
+						<div class="profile_pic">
+							<img src="../../images/img.jpg" alt="..."
+								class="img-circle profile_img">
+						</div>
+						<div class="profile_info">
+							<span>Welcome,</span>
+							<h2>John Doe</h2>
+						</div>
+					</div>
+					<!-- /menu profile quick info -->
+
+					<br />
+
+					<!-- sidebar menu -->
+					<div id="sidebar-menu"
+						class="main_menu_side hidden-print main_menu">
+						<div class="menu_section">
+							<h3>General</h3>
+							<ul class="nav side-menu">
+								<li><a><i class="fa fa-home"></i> 用户管理 <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="html/user/user.html">用户管理</a></li>
+										<li><a href="index2.html">权限管理</a></li>
+										<li><a href="index3.html">配置权限</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-edit"></i> 权限管理 <span class="fa fa-chevron-down"></span></a>
+                    				<ul class="nav child_menu">
+										<li><a href="role.html">角色管理</a></li>
+										<li><a href="permission.html">权限管理</a></li>
+										<li><a href="role_permission.html">权限配置</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-desktop"></i> UI Elements <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="general_elements.html">General Elements</a></li>
+										<li><a href="media_gallery.html">Media Gallery</a></li>
+										<li><a href="typography.html">Typography</a></li>
+										<li><a href="icons.html">Icons</a></li>
+										<li><a href="glyphicons.html">Glyphicons</a></li>
+										<li><a href="widgets.html">Widgets</a></li>
+										<li><a href="invoice.html">Invoice</a></li>
+										<li><a href="inbox.html">Inbox</a></li>
+										<li><a href="calendar.html">Calendar</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-table"></i> Tables <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="tables.html">Tables</a></li>
+										<li><a href="tables_dynamic.html">Table Dynamic</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-bar-chart-o"></i> Data
+										Presentation <span class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="chartjs.html">Chart JS</a></li>
+										<li><a href="chartjs2.html">Chart JS2</a></li>
+										<li><a href="morisjs.html">Moris JS</a></li>
+										<li><a href="echarts.html">ECharts</a></li>
+										<li><a href="other_charts.html">Other Charts</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-clone"></i>Layouts <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="fixed_sidebar.html">Fixed Sidebar</a></li>
+										<li><a href="fixed_footer.html">Fixed Footer</a></li>
+									</ul></li>
+							</ul>
+						</div>
+						<div class="menu_section">
+							<h3>Live On</h3>
+							<ul class="nav side-menu">
+								<li><a><i class="fa fa-bug"></i> Additional Pages <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="e_commerce.html">E-commerce</a></li>
+										<li><a href="projects.html">Projects</a></li>
+										<li><a href="project_detail.html">Project Detail</a></li>
+										<li><a href="contacts.html">Contacts</a></li>
+										<li><a href="profile.html">Profile</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-windows"></i> Extras <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="page_403.html">403 Error</a></li>
+										<li><a href="page_404.html">404 Error</a></li>
+										<li><a href="page_500.html">500 Error</a></li>
+										<li><a href="plain_page.html">Plain Page</a></li>
+										<li><a href="login.html">Login Page</a></li>
+										<li><a href="pricing_tables.html">Pricing Tables</a></li>
+									</ul></li>
+								<li><a><i class="fa fa-sitemap"></i> Multilevel Menu <span
+										class="fa fa-chevron-down"></span></a>
+									<ul class="nav child_menu">
+										<li><a href="#level1_1">Level One</a>
+										<li><a>Level One<span class="fa fa-chevron-down"></span></a>
+											<ul class="nav child_menu">
+												<li class="sub_menu"><a href="level2.html">Level
+														Two</a></li>
+												<li><a href="#level2_1">Level Two</a></li>
+												<li><a href="#level2_2">Level Two</a></li>
+											</ul></li>
+										<li><a href="#level1_2">Level One</a></li>
+									</ul></li>
+								<li><a href="javascript:void(0)"><i
+										class="fa fa-laptop"></i> Landing Page <span
+										class="label label-success pull-right">Coming Soon</span></a></li>
+							</ul>
+						</div>
+
+					</div>
+					<!-- /sidebar menu -->
+
+					<!-- /menu footer buttons -->
+					<div class="sidebar-footer hidden-small">
+						<a data-toggle="tooltip" data-placement="top" title="Settings">
+							<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+						</a> <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+							<span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+						</a> <a data-toggle="tooltip" data-placement="top" title="Lock"> <span
+							class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+						</a> <a data-toggle="tooltip" data-placement="top" title="Logout"
+							href="login.html"> <span class="glyphicon glyphicon-off"
+							aria-hidden="true"></span>
+						</a>
+					</div>
+					<!-- /menu footer buttons -->
+				</div>
+			</div>
+
+			<!-- top navigation -->
+			<div class="top_nav">
+				<div class="nav_menu">
+					<nav>
+						<div class="nav toggle">
+							<a id="menu_toggle"><i class="fa fa-bars"></i></a>
+						</div>
+
+						<ul class="nav navbar-nav navbar-right">
+							<li class=""><a href="javascript:;"
+								class="user-profile dropdown-toggle" data-toggle="dropdown"
+								aria-expanded="false"> <img src="../../images/img.jpg"
+									alt="">John Doe <span class=" fa fa-angle-down"></span>
+							</a>
+								<ul class="dropdown-menu dropdown-usermenu pull-right">
+									<li><a href="javascript:;"> Profile</a></li>
+									<li><a href="javascript:;"> <span
+											class="badge bg-red pull-right">50%</span> <span>Settings</span>
+									</a></li>
+									<li><a href="javascript:;">Help</a></li>
+									<li><a href="login.html"><i
+											class="fa fa-sign-out pull-right"></i> Log Out</a></li>
+								</ul></li>
+
+							<li role="presentation" class="dropdown"><a
+								href="javascript:;" class="dropdown-toggle info-number"
+								data-toggle="dropdown" aria-expanded="false"> <i
+									class="fa fa-envelope-o"></i> <span class="badge bg-green">6</span>
+							</a>
+								<ul id="menu1" class="dropdown-menu list-unstyled msg_list"
+									role="menu">
+									<li><a> <span class="image"><img
+												src="../../images/img.jpg" alt="Profile Image" /></span> <span>
+												<span>John Smith</span> <span class="time">3 mins ago</span>
+										</span> <span class="message"> Film festivals used to be
+												do-or-die moments for movie makers. They were where... </span>
+									</a></li>
+									<li><a> <span class="image"><img
+												src="../../images/img.jpg" alt="Profile Image" /></span> <span>
+												<span>John Smith</span> <span class="time">3 mins ago</span>
+										</span> <span class="message"> Film festivals used to be
+												do-or-die moments for movie makers. They were where... </span>
+									</a></li>
+									<li><a> <span class="image"><img
+												src="../../images/img.jpg" alt="Profile Image" /></span> <span>
+												<span>John Smith</span> <span class="time">3 mins ago</span>
+										</span> <span class="message"> Film festivals used to be
+												do-or-die moments for movie makers. They were where... </span>
+									</a></li>
+									<li><a> <span class="image"><img
+												src="../../images/img.jpg" alt="Profile Image" /></span> <span>
+												<span>John Smith</span> <span class="time">3 mins ago</span>
+										</span> <span class="message"> Film festivals used to be
+												do-or-die moments for movie makers. They were where... </span>
+									</a></li>
+									<li>
+										<div class="text-center">
+											<a> <strong>See All Alerts</strong> <i
+												class="fa fa-angle-right"></i>
+											</a>
+										</div>
+									</li>
+								</ul></li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+			<!-- /top navigation -->
+
+			<!-- page content -->
+			<div class="right_col" role="main">
+				<div class="row">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<div class="panel panel-default">
+							<div class="x_panel">
+								<div class="x_title">
+									<div class="x_content">
+										<div id="toolbar" class="btn-group">
+											<button id="btn_add" type="button" class="btn btn-default" onclick = "add()">
+												<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+											</button>
+											<button id="btn_delete" type="button" class="btn btn-default" onclick = "del()">
+												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+											</button>
+											<button id="btn_export" type="button" class="btn btn-default" onclick = "exp()">
+												<span class="glyphicon glyphicon-export" aria-hidden="true"></span>导出excel
+											</button>
+										</div>
+										<table id="rolepermissiontable"></table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /page content -->
+
+			<!-- footer content -->
+			<footer>
+				<div class="pull-right">
+					Gentelella - Bootstrap Admin Template by Colorlib. More Templates <a
+						href="http://www.cssmoban.com/" target="_blank" title="模板之家">模板之家</a>
+					- Collect from <a href="http://www.cssmoban.com/" title="网页模板"
+						target="_blank">网页模板</a>
+				</div>
+				<div class="clearfix"></div>
+			</footer>
+			<!-- /footer content -->
+		</div>
+	</div>
+
+	<!-- 新增窗体 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-985684" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="x_content" style = "width:600px;margin-left:700px">
+                    	<form class="form-horizontal form-label-center" novalidate>
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"
+										aria-hidden="true">×</button>
+									<h4 class="modal-title" id="myModalLabel">新增权限</h4>
+								</div>
+								<div class="modal-body">
+									<div class="item form-group">
+										<label class="control-label col-md-3 col-sm-3 col-xs-12">角色</label>
+										<div class="col-md-6 col-sm-6 col-xs-12">
+											<select class="form-control" id = "add_role">
+											</select>
+										</div>
+									</div>
+									<div class="item form-group" id = "add_select">
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default"
+										data-dismiss="modal">关闭</button>
+									<button type="button" id = "add" class="btn btn-primary">保存</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 删除窗体 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-770346" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal"
+									aria-hidden="true">×</button>
+								<h4 class="modal-title" id="myModalLabel">删除！</h4>
+							</div>
+							<div class="modal-body">
+								<p id="delete">确认删除？</p>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default"
+									data-dismiss="modal">关闭</button>
+								<button type="button" class="btn btn-primary" id="del">确认</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 修改窗体 -->
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<div class="modal fade" id="modal-container-985685" role="dialog"
+					aria-labelledby="myModalLabel" aria-hidden="true">
+					<div class="x_content" style = "width:600px;margin-left:700px">
+                    	<form class="form-horizontal form-label-center">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"
+										aria-hidden="true">×</button>
+									<h4 class="modal-title" id="myModalLabel">修改权限</h4>
+								</div>
+								<div class="modal-body" id = "update_modal_body">
+				
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default"
+										data-dismiss="modal">关闭</button>
+									<button type="button" id = "update" class="btn btn-primary">保存</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- FastClick -->
+	<script src="../../js/fastclick.js"></script>
+	<!-- NProgress -->
+	<script src="../../js/nprogress.js"></script>
+	<!-- iCheck -->
+	<script src="../../js/icheck.min.js"></script>
+	<!-- Datatables -->
+	<script src="../../js/jquery.dataTables.min.js"></script>
+	<script src="../../js/dataTables.bootstrap.min.js"></script>
+	<script src="../../js/dataTables.buttons.min.js"></script>
+	<script src="../../js/buttons.bootstrap.min.js"></script>
+	<script src="../../js/buttons.flash.min.js"></script>
+	<script src="../../js/buttons.html5.min.js"></script>
+	<script src="../../js/buttons.print.min.js"></script>
+	<script src="../../js/dataTables.fixedHeader.min.js"></script>
+	<script src="../../js/dataTables.keyTable.min.js"></script>
+	<script src="../../js/dataTables.responsive.min.js"></script>
+	<script src="../../js/responsive.bootstrap.js"></script>
+	<script src="../../js/dataTables.scroller.min.js"></script>
+	<script src="../../js/jszip.min.js"></script>
+	<script src="../../js/pdfmake.min.js"></script>
+	<script src="../../js/vfs_fonts.js"></script>
+	<script src="../../js/validator.js"></script>
+
+	<!-- Custom Theme Scripts -->
+	<script src="../../js/custom.min.js"></script>
+
+</body>
+</html>
